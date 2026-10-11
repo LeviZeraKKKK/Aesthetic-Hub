@@ -14,12 +14,12 @@ if playerGui:FindFirstChild("AetherisHub") then
 	playerGui.AetherisHub:Destroy()
 end
 
--- ScreenGui Principal
+-- ScreenGui Principal (Com DisplayOrder máximo para sobrepor tudo)
 local screenGui = Instance.new("ScreenGui")
 screenGui.Name = "AetherisHub"
 screenGui.ResetOnSpawn = false
 screenGui.IgnoreGuiInset = true
-screenGui.DisplayOrder = 999999 -- Sobrepõe todos os botões e menus da tela
+screenGui.DisplayOrder = 999999
 screenGui.Parent = playerGui
 
 -----------------------------------------------------------------
@@ -543,7 +543,7 @@ function showMainPanel()
 		return sContainer
 	end
 
-	-- Color Picker HSV Compacto Real
+	-- Color Picker HSV Compacto Real com UIGradient corrigido
 	local function addColorPicker(parent, title, defaultColor, callback)
 		local pickerFrame = Instance.new("Frame")
 		pickerFrame.Size = UDim2.new(1, 0, 0, 26)
@@ -606,21 +606,47 @@ function showMainPanel()
 		cCorner.CornerRadius = UDim.new(0, 4)
 		cCorner.Parent = canvas
 
-		local whiteOverlay = Instance.new("ImageLabel")
-		whiteOverlay.Size = UDim2.new(1, 0, 1, 0)
-		whiteOverlay.BackgroundTransparency = 1
-		whiteOverlay.Image = "rbxassetid://6023426915"
-		whiteOverlay.ImageColor3 = Color3.fromRGB(255, 255, 255)
-		whiteOverlay.ZIndex = 52
-		whiteOverlay.Parent = canvas
+		-- Gradiente Branco Horizontal (Saturação)
+		local whiteGradientFrame = Instance.new("Frame")
+		whiteGradientFrame.Size = UDim2.new(1, 0, 1, 0)
+		whiteGradientFrame.BackgroundColor3 = Color3.fromRGB(255, 255, 255)
+		whiteGradientFrame.BackgroundTransparency = 0
+		whiteGradientFrame.BorderSizePixel = 0
+		whiteGradientFrame.ZIndex = 52
+		whiteGradientFrame.Parent = canvas
 
-		local blackOverlay = Instance.new("ImageLabel")
-		blackOverlay.Size = UDim2.new(1, 0, 1, 0)
-		blackOverlay.BackgroundTransparency = 1
-		blackOverlay.Image = "rbxassetid://6023426915"
-		blackOverlay.ImageColor3 = Color3.fromRGB(0, 0, 0)
-		blackOverlay.ZIndex = 53
-		blackOverlay.Parent = canvas
+		local wgCorner = Instance.new("UICorner")
+		wgCorner.CornerRadius = UDim.new(0, 4)
+		wgCorner.Parent = whiteGradientFrame
+
+		local wGradient = Instance.new("UIGradient")
+		wGradient.Rotation = 0
+		wGradient.Transparency = NumberSequence.new({
+			NumberSequenceKeypoint.new(0, 0),
+			NumberSequenceKeypoint.new(1, 1)
+		})
+		wGradient.Parent = whiteGradientFrame
+
+		-- Gradiente Preto Vertical (Brilho/Valor)
+		local blackGradientFrame = Instance.new("Frame")
+		blackGradientFrame.Size = UDim2.new(1, 0, 1, 0)
+		blackGradientFrame.BackgroundColor3 = Color3.fromRGB(0, 0, 0)
+		blackGradientFrame.BackgroundTransparency = 0
+		blackGradientFrame.BorderSizePixel = 0
+		blackGradientFrame.ZIndex = 53
+		blackGradientFrame.Parent = canvas
+
+		local bgCorner = Instance.new("UICorner")
+		bgCorner.CornerRadius = UDim.new(0, 4)
+		bgCorner.Parent = blackGradientFrame
+
+		local bGradient = Instance.new("UIGradient")
+		bGradient.Rotation = 90
+		bGradient.Transparency = NumberSequence.new({
+			NumberSequenceKeypoint.new(0, 1),
+			NumberSequenceKeypoint.new(1, 0)
+		})
+		bGradient.Parent = blackGradientFrame
 
 		local cursor = Instance.new("Frame")
 		cursor.Size = UDim2.new(0, 7, 0, 7)
@@ -716,7 +742,7 @@ function showMainPanel()
 		return colorBtn
 	end
 
-	-- ESP Toggle com o botão de cor individual posicionado exatamente à esquerda do Toggle
+	-- ESP Toggle com o botão de cor individual posicionado à esquerda do Toggle
 	local function addEspToggleWithColor(parent, name, defaultColor, colorCallback, toggleCallback)
 		local toggleFrame = Instance.new("Frame")
 		toggleFrame.Size = UDim2.new(1, 0, 0, 26)
@@ -761,7 +787,7 @@ function showMainPanel()
 		cCorner.CornerRadius = UDim.new(1, 0)
 		cCorner.Parent = circle
 
-		-- Botão de Cor Individual posicionado exatamente à esquerda do botão Toggle
+		-- Botão de Cor Individual posicionado à esquerda do botão Toggle
 		local colorBtn = Instance.new("TextButton")
 		colorBtn.Size = UDim2.new(0, 18, 0, 14)
 		colorBtn.Position = UDim2.new(1, -58, 0.5, -7)
@@ -802,21 +828,47 @@ function showMainPanel()
 		cnCorner.CornerRadius = UDim.new(0, 4)
 		cnCorner.Parent = canvas
 
-		local whiteOverlay = Instance.new("ImageLabel")
-		whiteOverlay.Size = UDim2.new(1, 0, 1, 0)
-		whiteOverlay.BackgroundTransparency = 1
-		whiteOverlay.Image = "rbxassetid://6023426915"
-		whiteOverlay.ImageColor3 = Color3.fromRGB(255, 255, 255)
-		whiteOverlay.ZIndex = 52
-		whiteOverlay.Parent = canvas
+		-- Gradiente Branco Horizontal (Saturação) no ESP Toggle
+		local whiteGradientFrame = Instance.new("Frame")
+		whiteGradientFrame.Size = UDim2.new(1, 0, 1, 0)
+		whiteGradientFrame.BackgroundColor3 = Color3.fromRGB(255, 255, 255)
+		whiteGradientFrame.BackgroundTransparency = 0
+		whiteGradientFrame.BorderSizePixel = 0
+		whiteGradientFrame.ZIndex = 52
+		whiteGradientFrame.Parent = canvas
 
-		local blackOverlay = Instance.new("ImageLabel")
-		blackOverlay.Size = UDim2.new(1, 0, 1, 0)
-		blackOverlay.BackgroundTransparency = 1
-		blackOverlay.Image = "rbxassetid://6023426915"
-		blackOverlay.ImageColor3 = Color3.fromRGB(0, 0, 0)
-		blackOverlay.ZIndex = 53
-		blackOverlay.Parent = canvas
+		local wgCorner = Instance.new("UICorner")
+		wgCorner.CornerRadius = UDim.new(0, 4)
+		wgCorner.Parent = whiteGradientFrame
+
+		local wGradient = Instance.new("UIGradient")
+		wGradient.Rotation = 0
+		wGradient.Transparency = NumberSequence.new({
+			NumberSequenceKeypoint.new(0, 0),
+			NumberSequenceKeypoint.new(1, 1)
+		})
+		wGradient.Parent = whiteGradientFrame
+
+		-- Gradiente Preto Vertical (Brilho/Valor) no ESP Toggle
+		local blackGradientFrame = Instance.new("Frame")
+		blackGradientFrame.Size = UDim2.new(1, 0, 1, 0)
+		blackGradientFrame.BackgroundColor3 = Color3.fromRGB(0, 0, 0)
+		blackGradientFrame.BackgroundTransparency = 0
+		blackGradientFrame.BorderSizePixel = 0
+		blackGradientFrame.ZIndex = 53
+		blackGradientFrame.Parent = canvas
+
+		local bgCorner = Instance.new("UICorner")
+		bgCorner.CornerRadius = UDim.new(0, 4)
+		bgCorner.Parent = blackGradientFrame
+
+		local bGradient = Instance.new("UIGradient")
+		bGradient.Rotation = 90
+		bGradient.Transparency = NumberSequence.new({
+			NumberSequenceKeypoint.new(0, 1),
+			NumberSequenceKeypoint.new(1, 0)
+		})
+		bGradient.Parent = blackGradientFrame
 
 		local cur = Instance.new("Frame")
 		cur.Size = UDim2.new(0, 7, 0, 7)
@@ -1114,15 +1166,26 @@ function showMainPanel()
 end
 
 -----------------------------------------------------------------
--- RENDER LOOP (LÓGICA REAL DOS ESPs AVANÇADOS)
+-- RENDER LOOP (LÓGICA DOS ESPs E ATRIBUTOS DE MOVIMENTO)
 -----------------------------------------------------------------
 local espDrawings = {}
 
 RunService.RenderStepped:Connect(function()
 	local char = player.Character
 	if char and char:FindFirstChild("Humanoid") then
-		if _G_WalkSpeedEnabled then char.Humanoid.WalkSpeed = _G_WalkSpeedValue end
-		if _G_JumpPowerEnabled then char.Humanoid.JumpPower = _G_JumpPowerValue else char.Humanoid.JumpPower = 50 end
+		local hum = char.Humanoid
+		
+		if _G_WalkSpeedEnabled then 
+			hum.WalkSpeed = _G_WalkSpeedValue 
+		end
+		
+		if _G_JumpPowerEnabled then 
+			hum.UseJumpPower = true
+			hum.JumpPower = _G_JumpPowerValue 
+		else
+			hum.UseJumpPower = true
+			hum.JumpPower = 50
+		end
 	end
 
 	if _G_NoclipEnabled and char then
