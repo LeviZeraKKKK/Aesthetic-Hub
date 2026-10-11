@@ -542,7 +542,7 @@ function showMainPanel()
 		return sContainer
 	end
 
-	-- Color Picker HSV Compacto Real (Limpo, sem emojis)
+	-- Color Picker HSV Compacto Real
 	local function addColorPicker(parent, title, defaultColor, callback)
 		local pickerFrame = Instance.new("Frame")
 		pickerFrame.Size = UDim2.new(1, 0, 0, 26)
@@ -715,7 +715,7 @@ function showMainPanel()
 		return colorBtn
 	end
 
-	-- ESP Toggle com o botão de cor individual posicionado estritamente à esquerda do botão de ativação (toggle)
+	-- ESP Toggle com o botão de cor individual posicionado exatamente à esquerda do Toggle
 	local function addEspToggleWithColor(parent, name, defaultColor, colorCallback, toggleCallback)
 		local toggleFrame = Instance.new("Frame")
 		toggleFrame.Size = UDim2.new(1, 0, 0, 26)
@@ -727,9 +727,8 @@ function showMainPanel()
 		corner.CornerRadius = UDim.new(0, 5)
 		corner.Parent = toggleFrame
 
-		-- Rótulo do ESP
 		local label = Instance.new("TextLabel")
-		label.Size = UDim2.new(1, -85, 1, 0)
+		label.Size = UDim2.new(1, -75, 1, 0)
 		label.Position = UDim2.new(0, 8, 0, 0)
 		label.BackgroundTransparency = 1
 		label.Font = Enum.Font.GothamMedium
@@ -758,10 +757,10 @@ function showMainPanel()
 		circle.Parent = toggleBtn
 
 		local cCorner = Instance.new("UICorner")
-5		cCorner.CornerRadius = UDim.new(1, 0)
+		cCorner.CornerRadius = UDim.new(1, 0)
 		cCorner.Parent = circle
 
-		-- Botão de Cor Individual posicionado exatamente à esquerda do Toggle
+		-- Botão de Cor Individual posicionado exatamente à esquerda do botão Toggle (com margem de espaçamento perfeita)
 		local colorBtn = Instance.new("TextButton")
 		colorBtn.Size = UDim2.new(0, 18, 0, 14)
 		colorBtn.Position = UDim2.new(1, -58, 0.5, -7)
@@ -773,7 +772,6 @@ function showMainPanel()
 		cBtnCorner.CornerRadius = UDim.new(0, 3)
 		cBtnCorner.Parent = colorBtn
 
-		-- Modal do Color Picker HSV para o ESP
 		local modal = Instance.new("Frame")
 		modal.Size = UDim2.new(0, 150, 0, 130)
 		modal.Position = UDim2.new(0, -130, 1, 4)
@@ -1057,7 +1055,7 @@ function showMainPanel()
 	addToggle(secFisico, "Infinite Jump (Pulo Infinito)", function(state) _G_InfiniteJumpEnabled = state end)
 
 	-----------------------------------------------------------------
-	-- ABA VISUAL (ESP PLAYERS COMPLETO)
+	-- ABA VISUAL (ESP PLAYERS COMPLETO E ORGANIZADO)
 	-----------------------------------------------------------------
 	local visualPage = pages["Visual"]
 	local secEspPlayers = createSection(visualPage, "👁️ ESP Players")
@@ -1115,7 +1113,7 @@ function showMainPanel()
 end
 
 -----------------------------------------------------------------
--- RENDER LOOP (LÓGICA REAL DOS ESPs)
+-- RENDER LOOP (LÓGICA REAL DOS ESPs AVANÇADOS)
 -----------------------------------------------------------------
 local espDrawings = {}
 
