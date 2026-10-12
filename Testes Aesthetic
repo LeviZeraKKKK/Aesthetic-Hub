@@ -34,7 +34,7 @@ local isMobile = UserInputService.TouchEnabled and not UserInputService.Keyboard
 local currentPanelSize = isMobile and UDim2.new(0, 420, 0, 270) or UDim2.new(0, 580, 0, 390)
 
 -----------------------------------------------------------------
--- ESTADOS GLOBAIS & CORES ESP INDIVIDUAIS
+-- ESTADOS GLOBAIS & COMBATE (LOCK-ON)
 -----------------------------------------------------------------
 local _G_WalkSpeedEnabled = false
 local _G_WalkSpeedValue = 16
@@ -44,6 +44,11 @@ local _G_NoclipEnabled = false
 local _G_InfiniteJumpEnabled = false
 local _G_FullbrightEnabled = false
 local _G_EnergyEnabled = false
+
+-- Estados de Lock-On e Alvo
+local _G_LockOnEnabled = false
+local _G_LockMode = "Nearest" -- "Nearest" ou "Manual"
+local _G_LockTarget = nil
 
 -- Configurações ESP Master e Sub-recursos
 local _G_EspMaster = false
@@ -181,13 +186,12 @@ local loadBarFillCorner = Instance.new("UICorner")
 loadBarFillCorner.CornerRadius = UDim.new(1, 0)
 loadBarFillCorner.Parent = loadBarFill
 
--- Animação de Entrada dos Elementos de Carregamento
+-- Animação de Entrada
 TweenService:Create(loadIcon, TweenInfo.new(0.5, Enum.EasingStyle.Back), {TextTransparency = 0}):Play()
 TweenService:Create(loadTitle, TweenInfo.new(0.5), {TextTransparency = 0}):Play()
 TweenService:Create(loadStatus, TweenInfo.new(0.5), {TextTransparency = 0}):Play()
 TweenService:Create(percentLabel, TweenInfo.new(0.5), {TextTransparency = 0}):Play()
 
--- Loop para girar o anel sci-fi suavemente durante o carregamento
 local ringConn
 ringConn = RunService.RenderStepped:Connect(function(dt)
 	if sciFiRing and sciFiRing.Parent then
@@ -197,11 +201,10 @@ ringConn = RunService.RenderStepped:Connect(function(dt)
 	end
 end)
 
--- Processo de Carregamento em Fases Realistas
 task.spawn(function()
 	local steps = {
 		{progress = 0.25, text = "Carregando módulos do Blox Fruits..."},
-		{progress = 0.55, text = "Injetando sistemas ESP e Player..."},
+		{progress = 0.55, text = "Injetando sistemas ESP e Lock-On..."},
 		{progress = 0.85, text = "Sincronizando ambiente e texturas..."},
 		{progress = 1.00, text = "Inicialização concluída com sucesso!"}
 	}
@@ -213,9 +216,7 @@ task.spawn(function()
 			Size = UDim2.new(step.progress, 0, 1, 0)
 		}):Play()
 		
-		local targetPercent = math.floor(step.progress * 100)
-		percentLabel.Text = targetPercent .. "%"
-		
+		percentLabel.Text = math.floor(step.progress * 100) .. "%"
 		task.wait(currentTweenTime + 0.1)
 	end
 	
@@ -686,7 +687,6 @@ function showMainPanel()
 		local whiteGradientFrame = Instance.new("Frame")
 		whiteGradientFrame.Size = UDim2.new(1, 0, 1, 0)
 		whiteGradientFrame.BackgroundColor3 = Color3.fromRGB(255, 255, 255)
-		whiteGradientFrame.BackgroundTransparency = 0
 		whiteGradientFrame.BorderSizePixel = 0
 		whiteGradientFrame.ZIndex = 52
 		whiteGradientFrame.Parent = canvas
@@ -706,7 +706,6 @@ function showMainPanel()
 		local blackGradientFrame = Instance.new("Frame")
 		blackGradientFrame.Size = UDim2.new(1, 0, 1, 0)
 		blackGradientFrame.BackgroundColor3 = Color3.fromRGB(0, 0, 0)
-		blackGradientFrame.BackgroundTransparency = 0
 		blackGradientFrame.BorderSizePixel = 0
 		blackGradientFrame.ZIndex = 53
 		blackGradientFrame.Parent = canvas
@@ -817,7 +816,7 @@ function showMainPanel()
 		return colorBtn
 	end
 
-	-- ESP Toggle com o botão de cor individual posicionado à esquerda do Toggle
+	-- ESP Toggle com cor
 	local function addEspToggleWithColor(parent, name, defaultColor, colorCallback, toggleCallback)
 		local toggleFrame = Instance.new("Frame")
 		toggleFrame.Size = UDim2.new(1, 0, 0, 26)
@@ -904,7 +903,6 @@ function showMainPanel()
 		local whiteGradientFrame = Instance.new("Frame")
 		whiteGradientFrame.Size = UDim2.new(1, 0, 1, 0)
 		whiteGradientFrame.BackgroundColor3 = Color3.fromRGB(255, 255, 255)
-		whiteGradientFrame.BackgroundTransparency = 0
 		whiteGradientFrame.BorderSizePixel = 0
 		whiteGradientFrame.ZIndex = 52
 		whiteGradientFrame.Parent = canvas
@@ -924,7 +922,6 @@ function showMainPanel()
 		local blackGradientFrame = Instance.new("Frame")
 		blackGradientFrame.Size = UDim2.new(1, 0, 1, 0)
 		blackGradientFrame.BackgroundColor3 = Color3.fromRGB(0, 0, 0)
-		blackGradientFrame.BackgroundTransparency = 0
 		blackGradientFrame.BorderSizePixel = 0
 		blackGradientFrame.ZIndex = 53
 		blackGradientFrame.Parent = canvas
@@ -1044,7 +1041,7 @@ function showMainPanel()
 		end)
 	end
 
-	-- Toggle Comum Compacto
+	-- Toggle Comum
 	local function addToggle(parent, name, callback)
 		local toggleFrame = Instance.new("Frame")
 		toggleFrame.Size = UDim2.new(1, 0, 0, 26)
@@ -1180,6 +1177,108 @@ function showMainPanel()
 	addToggle(secFisico, "Energia Instantânea", function(state) _G_EnergyEnabled = state end)
 
 	-----------------------------------------------------------------
+	-- ABA COMBATE (COM LOCK-ON E SELEÇÃO DE ALVOS)
+	-----------------------------------------------------------------
+	local combatePage = pages["Combate"]
+	local secCombat = createSection(combatePage, "⚔️ Sistema de Lock-On")
+	
+	addToggle(secCombat, "Ativar Lock-On (Camera Aim)", function(state)
+		_G_LockOnEnabled = state
+	end)
+
+	-- Botão para Alternar Modo (Nearest / Manual)
+	local modeToggleFrame = Instance.new("Frame")
+	modeToggleFrame.Size = UDim2.new(1, 0, 0, 26)
+	modeToggleFrame.BackgroundColor3 = Color3.fromRGB(34, 34, 46)
+	modeToggleFrame.BackgroundTransparency = 0.5
+	modeToggleFrame.Parent = secCombat
+
+	local mc = Instance.new("UICorner")
+	mc.CornerRadius = UDim.new(0, 5)
+	mc.Parent = modeToggleFrame
+
+	local modeLabel = Instance.new("TextLabel")
+	modeLabel.Size = UDim2.new(1, -16, 1, 0)
+	modeLabel.Position = UDim2.new(0, 8, 0, 0)
+	modeLabel.BackgroundTransparency = 1
+	modeLabel.Font = Enum.Font.GothamMedium
+	modeLabel.Text = "Modo: Nearest (Mais Próximo)"
+	modeLabel.TextColor3 = Color3.fromRGB(200, 200, 200)
+	modeLabel.TextSize = 11
+	modeLabel.TextXAlignment = Enum.TextXAlignment.Left
+	modeLabel.Parent = modeToggleFrame
+
+	local modeBtn = Instance.new("TextButton")
+	modeBtn.Size = UDim2.new(1, 0, 1, 0)
+	modeBtn.BackgroundTransparency = 1
+	modeBtn.Text = ""
+	modeBtn.Parent = modeToggleFrame
+
+	modeBtn.MouseButton1Click:Connect(function()
+		if _G_LockMode == "Nearest" then
+			_G_LockMode = "Manual"
+			modeLabel.Text = "Modo: Manual (Selecionado na Lista)"
+		else
+			_G_LockMode = "Nearest"
+			modeLabel.Text = "Modo: Nearest (Mais Próximo)"
+		end
+	end)
+
+	-- Seção para Lista de Alvos Manuais
+	local secTargets = createSection(combatePage, "🎯 Lista de Alvos (Manual)")
+	
+	local targetScroll = Instance.new("ScrollingFrame")
+	targetScroll.Size = UDim2.new(1, 0, 0, 100)
+	targetScroll.BackgroundTransparency = 1
+	targetScroll.BorderSizePixel = 0
+	targetScroll.CanvasSize = UDim2.new(0, 0, 0, 0)
+	targetScroll.ScrollBarThickness = 2
+	targetScroll.Parent = secTargets
+
+	local targetLayout = Instance.new("UIListLayout")
+	targetLayout.SortOrder = Enum.SortOrder.LayoutOrder
+	targetLayout.Padding = UDim.new(0, 3)
+	targetLayout.Parent = targetScroll
+
+	local function refreshTargetList()
+		for _, child in ipairs(targetScroll:GetChildren()) do
+			if child:IsA("TextButton") then child:Destroy() end
+		end
+
+		local count = 0
+		for _, p in ipairs(Players:GetPlayers()) do
+			if p ~= player then
+				count = count + 1
+				local item = Instance.new("TextButton")
+				item.Size = UDim2.new(1, 0, 0, 24)
+				item.BackgroundColor3 = (_G_LockTarget == p) and currentThemeColor or Color3.fromRGB(40, 40, 55)
+				item.Text = "  " .. p.DisplayName
+				item.TextColor3 = Color3.fromRGB(255, 255, 255)
+				item.Font = Enum.Font.GothamMedium
+				item.TextSize = 10
+				item.TextXAlignment = Enum.TextXAlignment.Left
+				item.Parent = targetScroll
+
+				local iCorner = Instance.new("UICorner")
+				iCorner.CornerRadius = UDim.new(0, 4)
+				iCorner.Parent = item
+
+				item.MouseButton1Click:Connect(function()
+					_G_LockMode = "Manual"
+					modeLabel.Text = "Modo: Manual (@" .. p.Name .. ")"
+					_G_LockTarget = p
+					refreshTargetList()
+				end)
+			end
+		end
+		targetScroll.CanvasSize = UDim2.new(0, 0, 0, count * 27)
+	end
+
+	refreshTargetList()
+	Players.PlayerAdded:Connect(refreshTargetList)
+	Players.PlayerRemoving:Connect(refreshTargetList)
+
+	-----------------------------------------------------------------
 	-- ABA VISUAL
 	-----------------------------------------------------------------
 	local visualPage = pages["Visual"]
@@ -1205,10 +1304,6 @@ function showMainPanel()
 	-----------------------------------------------------------------
 	-- OUTRAS ABAS
 	-----------------------------------------------------------------
-	local combatePage = pages["Combate"]
-	local secCombat = createSection(combatePage, "⚔️ Combate")
-	addToggle(secCombat, "Aimbot Player", function(state) end)
-
 	local farmingPage = pages["Farming"]
 	local secFarm = createSection(farmingPage, "⚡ Automação")
 	addToggle(secFarm, "Auto Farm Level", function(state) end)
@@ -1238,9 +1333,32 @@ function showMainPanel()
 end
 
 -----------------------------------------------------------------
--- RENDER LOOP (LÓGICA DOS ESPs, MOVIMENTO E ENERGIA)
+-- RENDER LOOP (LÓGICA DOS ESPs, MOVIMENTO, ENERGIA E LOCK-ON)
 -----------------------------------------------------------------
 local espDrawings = {}
+
+local function getNearestPlayer()
+	local closestPlayer = nil
+	local shortestDistance = math.huge
+	local myChar = player.Character
+
+	if not myChar or not myChar:FindFirstChild("HumanoidRootPart") then return nil end
+	local myPos = myChar.HumanoidRootPart.Position
+
+	for _, p in ipairs(Players:GetPlayers()) do
+		if p ~= player and p.Character and p.Character:FindFirstChild("HumanoidRootPart") then
+			local hum = p.Character:FindFirstChild("Humanoid")
+			if hum and hum.Health > 0 then
+				local dist = (p.Character.HumanoidRootPart.Position - myPos).Magnitude
+				if dist < shortestDistance then
+					shortestDistance = dist
+					closestPlayer = p
+				end
+			end
+		end
+	end
+	return closestPlayer
+end
 
 RunService.RenderStepped:Connect(function()
 	local char = player.Character
@@ -1266,30 +1384,28 @@ RunService.RenderStepped:Connect(function()
 		end
 	end
 
-	-- Lógica da Energia Instantânea
 	if _G_EnergyEnabled and char then
-		if char:GetAttribute("Energy") then
-			char:SetAttribute("Energy", 999999)
-		end
-		
-		if char:GetAttribute("Stamina") then
-			char:SetAttribute("Stamina", 999999)
+		char:SetAttribute("Energy", 999999)
+		char:SetAttribute("Stamina", 999999)
+	end
+
+	-- Executa o Lock-On na Câmera se ativado
+	if _G_LockOnEnabled then
+		if _G_LockMode == "Nearest" then
+			_G_LockTarget = getNearestPlayer()
 		end
 
-		local energyObj = char:FindFirstChild("Energy") or (player:FindFirstChild("Data") and player.Data:FindFirstChild("Energy"))
-		if energyObj and energyObj:IsA("ValueBase") then
-			energyObj.Value = 999999
-		end
-		
-		local stats = player:FindFirstChild("Stats")
-		if stats then
-			local statEnergy = stats:FindFirstChild("Energy") or stats:FindFirstChild("Stamina")
-			if statEnergy and statEnergy:IsA("ValueBase") then
-				statEnergy.Value = 999999
+		if _G_LockTarget and _G_LockTarget.Character and _G_LockTarget.Character:FindFirstChild("Head") then
+			local targetHead = _G_LockTarget.Character.Head
+			local hum = _G_LockTarget.Character:FindFirstChild("Humanoid")
+			
+			if hum and hum.Health > 0 then
+				camera.CFrame = CFrame.new(camera.CFrame.Position, targetHead.Position)
 			end
 		end
 	end
 
+	-- Lógica de renderização do ESP
 	for _, targetPlayer in pairs(Players:GetPlayers()) do
 		if targetPlayer ~= player then
 			local tChar = targetPlayer.Character
@@ -1428,4 +1544,3 @@ RunService.RenderStepped:Connect(function()
 		end
 	end
 end)
-
