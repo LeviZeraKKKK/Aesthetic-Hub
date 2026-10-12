@@ -45,11 +45,10 @@ local _G_InfiniteJumpEnabled = false
 local _G_FullbrightEnabled = false
 local _G_EnergyEnabled = false
 
--- Estados do Sistema Lock-On e Highlight Integrados
+-- Estados do Sistema Lock-On
 local isLockOnEnabled = false
 local lockOnMode = "Nearest" -- "Nearest" ou "Manual"
 local lockOnTarget = nil
-local isHighlightEnabled = false
 
 -- Configurações ESP Master e Sub-recursos
 local _G_EspMaster = false
@@ -1209,58 +1208,119 @@ function showMainPanel()
 	end)
 
 	-----------------------------------------------------------------
-	-- ABA COMBATE (Com Lock-On Integrado)
+	-- ABA COMBATE (Com Lock-On Integrado no Estilo Aetheris)
 	-----------------------------------------------------------------
 	local combatePage = pages["Combate"]
 	local secCombat = createSection(combatePage, "⚔️ Sistema Lock-On")
 
-	-- Botão Lock-On Master Toggle (Estilo GemKrox)
-	local lockToggleBtn = Instance.new("TextButton")
-	lockToggleBtn.Size = UDim2.new(1, 0, 0, 26)
-	lockToggleBtn.BackgroundColor3 = Color3.fromRGB(180, 40, 40)
-	lockToggleBtn.Font = Enum.Font.GothamBold
-	lockToggleBtn.Text = "LOCK-ON: OFF"
-	lockToggleBtn.TextColor3 = Color3.fromRGB(255, 255, 255)
-	lockToggleBtn.TextSize = 11
-	lockToggleBtn.Parent = secCombat
+	-- Botão Lock-On utilizando o padrão de Toggle estilizado do Aetheris
+	local function addCustomToggle(parent, name, initial, callback)
+		local toggleFrame = Instance.new("Frame")
+		toggleFrame.Size = UDim2.new(1, 0, 0, 26)
+		toggleFrame.BackgroundColor3 = Color3.fromRGB(34, 34, 46)
+		toggleFrame.BackgroundTransparency = 0.5
+		toggleFrame.Parent = parent
 
-	local ltcCorner = Instance.new("UICorner")
-	ltcCorner.CornerRadius = UDim.new(0, 5)
-	ltcCorner.Parent = lockToggleBtn
+		local corner = Instance.new("UICorner")
+		corner.CornerRadius = UDim.new(0, 5)
+		corner.Parent = toggleFrame
 
-	lockToggleBtn.MouseButton1Click:Connect(function()
-		isLockOnEnabled = not isLockOnEnabled
-		if isLockOnEnabled then
-			lockToggleBtn.Text = "LOCK-ON: ON"
-			lockToggleBtn.BackgroundColor3 = Color3.fromRGB(40, 180, 80)
-		else
-			lockToggleBtn.Text = "LOCK-ON: OFF"
-			lockToggleBtn.BackgroundColor3 = Color3.fromRGB(180, 40, 40)
-		end
+		local label = Instance.new("TextLabel")
+		label.Size = UDim2.new(1, -40, 1, 0)
+		label.Position = UDim2.new(0, 8, 0, 0)
+		label.BackgroundTransparency = 1
+		label.Font = Enum.Font.GothamMedium
+		label.Text = name
+		label.TextColor3 = Color3.fromRGB(200, 200, 200)
+		label.TextSize = 11
+		label.TextXAlignment = Enum.TextXAlignment.Left
+		label.Parent = toggleFrame
+
+		local toggleBtn = Instance.new("TextButton")
+		toggleBtn.Size = UDim2.new(0, 28, 0, 16)
+		toggleBtn.Position = UDim2.new(1, -34, 0.5, -8)
+		toggleBtn.BackgroundColor3 = initial and currentThemeColor or Color3.fromRGB(50, 50, 70)
+		toggleBtn.Text = ""
+		toggleBtn.Parent = toggleFrame
+
+		local tCorner = Instance.new("UICorner")
+		tCorner.CornerRadius = UDim.new(1, 0)
+		tCorner.Parent = toggleBtn
+
+		local circle = Instance.new("Frame")
+		circle.Size = UDim2.new(0, 12, 0, 12)
+		circle.Position = initial and UDim2.new(1, -14, 0.5, -6) or UDim2.new(0, 2, 0.5, -6)
+		circle.BackgroundColor3 = Color3.fromRGB(200, 200, 200)
+		circle.Parent = toggleBtn
+
+		local cCorner = Instance.new("UICorner")
+		cCorner.CornerRadius = UDim.new(1, 0)
+		cCorner.Parent = circle
+
+		local toggled = initial
+		toggleBtn.MouseButton1Click:Connect(function()
+			toggled = not toggled
+			local targetPos = toggled and UDim2.new(1, -14, 0.5, -6) or UDim2.new(0, 2, 0.5, -6)
+			local targetColor = toggled and currentThemeColor or Color3.fromRGB(50, 50, 70)
+			
+			TweenService:Create(circle, TweenInfo.new(0.18), {Position = targetPos}):Play()
+			TweenService:Create(toggleBtn, TweenInfo.new(0.18), {BackgroundColor3 = targetColor}):Play()
+			
+			callback(toggled)
+		end)
+		return toggleBtn
+	end
+
+	addCustomToggle(secCombat, "Ativar Lock-On", isLockOnEnabled, function(state)
+		isLockOnEnabled = state
 	end)
 
-	-- Botão Modo de Lock-On
-	local modeBtn = Instance.new("TextButton")
-	modeBtn.Size = UDim2.new(1, 0, 0, 26)
-	modeBtn.BackgroundColor3 = Color3.fromRGB(34, 34, 46)
-	modeBtn.Font = Enum.Font.GothamMedium
-	modeBtn.Text = "MODE: NEAREST"
-	modeBtn.TextColor3 = Color3.fromRGB(255, 255, 255)
-	modeBtn.TextSize = 11
-	modeBtn.Parent = secCombat
+	-- Botão Modo de Lock-On no estilo Aetheris
+	local modeFrame = Instance.new("Frame")
+	modeFrame.Size = UDim2.new(1, 0, 0, 26)
+	modeFrame.BackgroundColor3 = Color3.fromRGB(34, 34, 46)
+	modeFrame.BackgroundTransparency = 0.5
+	modeFrame.Parent = secCombat
 
-	local mbCorner = Instance.new("UICorner")
-	mbCorner.CornerRadius = UDim.new(0, 5)
-	mbCorner.Parent = modeBtn
+	local mfCorner = Instance.new("UICorner")
+	mfCorner.CornerRadius = UDim.new(0, 5)
+	mfCorner.Parent = modeFrame
+
+	local modeLabel = Instance.new("TextLabel")
+	modeLabel.Size = UDim2.new(1, -90, 1, 0)
+	modeLabel.Position = UDim2.new(0, 8, 0, 0)
+	modeLabel.BackgroundTransparency = 1
+	modeLabel.Font = Enum.Font.GothamMedium
+	modeLabel.Text = "Modo Lock-On"
+	modeLabel.TextColor3 = Color3.fromRGB(200, 200, 200)
+	modeLabel.TextSize = 11
+	modeLabel.TextXAlignment = Enum.TextXAlignment.Left
+	modeLabel.Parent = modeFrame
+
+	local modeSwitchBtn = Instance.new("TextButton")
+	modeSwitchBtn.Size = UDim2.new(0, 80, 0, 18)
+	modeSwitchBtn.Position = UDim2.new(1, -86, 0.5, -9)
+	modeSwitchBtn.BackgroundColor3 = Color3.fromRGB(50, 50, 70)
+	modeSwitchBtn.Font = Enum.Font.GothamBold
+	modeSwitchBtn.Text = lockOnMode
+	modeSwitchBtn.TextColor3 = Color3.fromRGB(255, 255, 255)
+	modeSwitchBtn.TextSize = 10
+	modeSwitchBtn.Parent = modeFrame
+
+	local msCorner = Instance.new("UICorner")
+	msCorner.CornerRadius = UDim.new(0, 4)
+	msCorner.Parent = modeSwitchBtn
 
 	-- Botão Atualizar Lista
 	local refreshBtn = Instance.new("TextButton")
-	refreshBtn.Size = UDim2.new(1, 0, 0, 24)
-	refreshBtn.BackgroundColor3 = currentThemeColor
-	refreshBtn.Font = Enum.Font.GothamBold
-	refreshBtn.Text = "REFRESH PLAYER LIST"
-	refreshBtn.TextColor3 = Color3.fromRGB(255, 255, 255)
-	refreshBtn.TextSize = 10
+	refreshBtn.Size = UDim2.new(1, 0, 0, 26)
+	refreshBtn.BackgroundColor3 = Color3.fromRGB(34, 34, 46)
+	refreshBtn.BackgroundTransparency = 0.5
+	refreshBtn.Font = Enum.Font.GothamMedium
+	refreshBtn.Text = "  🔄 Atualizar Lista de Jogadores"
+	refreshBtn.TextColor3 = Color3.fromRGB(200, 200, 200)
+	refreshBtn.TextSize = 11
+	refreshBtn.TextXAlignment = Enum.TextXAlignment.Left
 	refreshBtn.Parent = secCombat
 
 	local rbCorner = Instance.new("UICorner")
@@ -1311,7 +1371,7 @@ function showMainPanel()
 
 				item.MouseButton1Click:Connect(function()
 					lockOnMode = "Manual"
-					modeBtn.Text = "MODE: MANUAL"
+					modeSwitchBtn.Text = lockOnMode
 					lockOnTarget = p
 					updateServerList()
 				end)
@@ -1326,14 +1386,13 @@ function showMainPanel()
 	Players.PlayerRemoving:Connect(updateServerList)
 	updateServerList()
 
-	modeBtn.MouseButton1Click:Connect(function()
+	modeSwitchBtn.MouseButton1Click:Connect(function()
 		if lockOnMode == "Nearest" then
 			lockOnMode = "Manual"
-			modeBtn.Text = "MODE: MANUAL"
 		else
 			lockOnMode = "Nearest"
-			modeBtn.Text = "MODE: NEAREST"
 		end
+		modeSwitchBtn.Text = lockOnMode
 		updateServerList()
 	end)
 
@@ -1360,7 +1419,6 @@ function showMainPanel()
 		subTitleLabel.TextColor3 = color
 		loadIcon.TextColor3 = color
 		resizeHandle.TextColor3 = color
-		refreshBtn.BackgroundColor3 = color
 		for _, ind in pairs(tabIndicators) do ind.BackgroundColor3 = color end
 	end)
 
@@ -1555,7 +1613,7 @@ RunService.RenderStepped:Connect(function()
 					cache.NameText.Center = true
 					cache.NameText.Outline = true
 					cache.NameText.Color = _G_ColorName
-					cache.NameText.Position = Vector2.new(pos.X, pos.Y - 35)
+					cache.NameTest.Position = Vector2.new(pos.X, pos.Y - 35)
 					cache.NameText.Visible = true
 				else
 					cache.NameText.Visible = false
