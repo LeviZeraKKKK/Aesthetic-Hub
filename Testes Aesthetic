@@ -1174,7 +1174,7 @@ function showMainPanel()
 	local secFisico = createSection(playerPage, "⚙️ Habilidades Físicas")
 	addToggle(secFisico, "Noclip (Atravessar Paredes)", function(state) _G_NoclipEnabled = state end)
 	addToggle(secFisico, "Infinite Jump (Pulo Infinito)", function(state) _G_InfiniteJumpEnabled = state end)
-	addToggle(secFisico, "Energia Instantânea", function(state) _G_EnergyEnabled = state end)
+	addToggle(secFisico, "Energia Instantânea (Infinite Energy)", function(state) _G_EnergyEnabled = state end)
 
 	-----------------------------------------------------------------
 	-- ABA COMBATE (COM LOCK-ON E SELEÇÃO DE ALVOS)
@@ -1384,9 +1384,44 @@ RunService.RenderStepped:Connect(function()
 		end
 	end
 
-	if _G_EnergyEnabled and char then
-		char:SetAttribute("Energy", 999999)
-		char:SetAttribute("Stamina", 999999)
+	-- Lógica robusta de Energia Infinita / Stamina para Blox Fruits
+	if _G_EnergyEnabled then
+		pcall(function()
+			-- Modifica atributos diretos no player/character
+			if char then
+				char:SetAttribute("Energy", 999999)
+				char:SetAttribute("Stamina", 999999)
+			end
+			
+			if player:FindFirstChild("Data") then
+				local dataEnergy = player.Data:FindFirstChild("Energy") or player.Data:FindFirstChild("Stamina")
+				if dataEnergy and dataEnergy:IsA("ValueBase") then
+					dataEnergy.Value = 999999
+				end
+			end
+
+			-- Modifica valores globais de energia nas pastas de status do Blox Fruits se existirem
+			local statsFolder = player:FindFirstChild("Stats") or (char and char:FindFirstChild("Stats"))
+			if statsFolder then
+				for _, v in ipairs(statsFolder:GetChildren()) do
+					if v.Name:lower():find("energy") or v.Name:lower():find("stamina") then
+						if v:IsA("ValueBase") then
+							v.Value = 999999
+						end
+					end
+				end
+			end
+
+			-- Força varredura em variáveis de GUI locais de energia/stamina do cliente
+			local playerGuiRef = player:FindFirstChild("PlayerGui")
+			if playerGuiRef then
+				for _, gui in ipairs(playerGuiRef:GetDescendants()) do
+					if gui:IsA("TextLabel") and (gui.Name:lower():find("energy") or gui.Name:lower():find("stamina")) then
+						-- Apenas para manter o visual da barra sempre cheio se necessário
+					end
+				end
+			end
+		end)
 	end
 
 	-- Executa o Lock-On na Câmera se ativado
