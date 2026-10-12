@@ -28,10 +28,10 @@ screenGui.Parent = playerGui
 local currentThemeColor = Color3.fromRGB(138, 43, 226)
 
 -----------------------------------------------------------------
--- DETECÇÃO DE PLATAFORMA & TAMANHO COMPACTO
+-- DETECÇÃO DE PLATAFORMA & TAMANHO DINÂMICO
 -----------------------------------------------------------------
 local isMobile = UserInputService.TouchEnabled and not UserInputService.KeyboardEnabled
-local panelSize = isMobile and UDim2.new(0, 420, 0, 270) or UDim2.new(0, 580, 0, 390)
+local currentPanelSize = isMobile and UDim2.new(0, 420, 0, 270) or UDim2.new(0, 580, 0, 390)
 
 -----------------------------------------------------------------
 -- ESTADOS GLOBAIS & CORES ESP INDIVIDUAIS
@@ -63,68 +63,106 @@ local _G_ColorDistance = Color3.fromRGB(200, 200, 255)
 local _G_ColorHead = Color3.fromRGB(255, 100, 100)
 
 -----------------------------------------------------------------
--- TELA DE CARREGAMENTO
+-- TELA DE CARREGAMENTO ULTRA PROFISSIONAL
 -----------------------------------------------------------------
 local loadWrapper = Instance.new("Frame")
-loadWrapper.Size = UDim2.new(0, 320, 0, 160)
-loadWrapper.Position = UDim2.new(0.5, -160, 0.5, -80)
-loadWrapper.BackgroundColor3 = Color3.fromRGB(14, 14, 20)
-loadWrapper.BackgroundTransparency = 0.15
+loadWrapper.Size = UDim2.new(0, 360, 0, 180)
+loadWrapper.Position = UDim2.new(0.5, -180, 0.5, -90)
+loadWrapper.BackgroundColor3 = Color3.fromRGB(12, 12, 18)
+loadWrapper.BackgroundTransparency = 0.1
 loadWrapper.BorderSizePixel = 0
 loadWrapper.ClipsDescendants = true
 loadWrapper.Parent = screenGui
 
 local loadCorner = Instance.new("UICorner")
-loadCorner.CornerRadius = UDim.new(0, 12)
+loadCorner.CornerRadius = UDim.new(0, 14)
 loadCorner.Parent = loadWrapper
 
 local loadStroke = Instance.new("UIStroke")
 loadStroke.Color = currentThemeColor
-loadStroke.Transparency = 0.3
-loadStroke.Thickness = 1.5
+loadStroke.Transparency = 0.2
+loadStroke.Thickness = 1.8
 loadStroke.Parent = loadWrapper
 
+-- Anel Externo Giratório Decorativo (Sci-Fi Ring)
+local sciFiRing = Instance.new("Frame")
+sciFiRing.Size = UDim2.new(0, 54, 0, 54)
+sciFiRing.Position = UDim2.new(0.5, -27, 0, 18)
+sciFiRing.BackgroundTransparency = 1
+sciFiRing.Parent = loadWrapper
+
+local ringStroke = Instance.new("UIStroke")
+ringStroke.Color = currentThemeColor
+ringStroke.Transparency = 0.5
+ringStroke.Thickness = 1.5
+ringStroke.Parent = sciFiRing
+
+local ringCorner = Instance.new("UICorner")
+ringCorner.CornerRadius = UDim.new(1, 0)
+ringCorner.Parent = sciFiRing
+
+-- Ícone Central
 local loadIcon = Instance.new("TextLabel")
-loadIcon.Size = UDim2.new(0, 34, 0, 34)
-loadIcon.Position = UDim2.new(0.5, -17, 0, 16)
-loadIcon.BackgroundColor3 = Color3.fromRGB(25, 25, 35)
+loadIcon.Size = UDim2.new(0, 42, 0, 42)
+loadIcon.Position = UDim2.new(0.5, -21, 0, 24)
+loadIcon.BackgroundColor3 = Color3.fromRGB(20, 20, 30)
 loadIcon.Font = Enum.Font.GothamBold
 loadIcon.Text = "⚡"
 loadIcon.TextColor3 = currentThemeColor
-loadIcon.TextSize = 16
+loadIcon.TextSize = 20
 loadIcon.TextTransparency = 1
 loadIcon.Parent = loadWrapper
 
 local iconCorner = Instance.new("UICorner")
-iconCorner.CornerRadius = UDim.new(0, 8)
+iconCorner.CornerRadius = UDim.new(0, 10)
 iconCorner.Parent = loadIcon
 
+local iconStroke = Instance.new("UIStroke")
+iconStroke.Color = currentThemeColor
+iconStroke.Transparency = 0.4
+iconStroke.Thickness = 1
+iconStroke.Parent = loadIcon
+
+-- Títulos e Status Dinâmico
 local loadTitle = Instance.new("TextLabel")
 loadTitle.Size = UDim2.new(1, 0, 0, 20)
-loadTitle.Position = UDim2.new(0, 0, 0, 58)
+loadTitle.Position = UDim2.new(0, 0, 0, 78)
 loadTitle.BackgroundTransparency = 1
 loadTitle.Font = Enum.Font.GothamBold
 loadTitle.Text = "AETHERIS HUB"
 loadTitle.TextColor3 = Color3.fromRGB(255, 255, 255)
-loadTitle.TextSize = 16
+loadTitle.TextSize = 15
 loadTitle.TextTransparency = 1
 loadTitle.Parent = loadWrapper
 
-local loadSubtitle = Instance.new("TextLabel")
-loadSubtitle.Size = UDim2.new(1, 0, 0, 14)
-loadSubtitle.Position = UDim2.new(0, 0, 0, 78)
-loadSubtitle.BackgroundTransparency = 1
-loadSubtitle.Font = Enum.Font.GothamMedium
-loadSubtitle.Text = "Blox Fruits • Inicializando V2..."
-loadSubtitle.TextColor3 = Color3.fromRGB(170, 170, 190)
-loadSubtitle.TextSize = 10
-loadSubtitle.TextTransparency = 1
-loadSubtitle.Parent = loadWrapper
+local loadStatus = Instance.new("TextLabel")
+loadStatus.Size = UDim2.new(1, 0, 0, 14)
+loadStatus.Position = UDim2.new(0, 0, 0, 98)
+loadStatus.BackgroundTransparency = 1
+loadStatus.Font = Enum.Font.GothamMedium
+loadStatus.Text = "Iniciando protocolos de segurança..."
+loadStatus.TextColor3 = Color3.fromRGB(160, 160, 180)
+loadStatus.TextSize = 10
+loadStatus.TextTransparency = 1
+loadStatus.Parent = loadWrapper
 
+-- Porcentagem Numérica
+local percentLabel = Instance.new("TextLabel")
+percentLabel.Size = UDim2.new(1, 0, 0, 14)
+percentLabel.Position = UDim2.new(0, 0, 0, 122)
+percentLabel.BackgroundTransparency = 1
+percentLabel.Font = Enum.Font.GothamBold
+percentLabel.Text = "0%"
+percentLabel.TextColor3 = currentThemeColor
+percentLabel.TextSize = 11
+percentLabel.TextTransparency = 1
+percentLabel.Parent = loadWrapper
+
+-- Barra de Carregamento com Glow
 local loadBarBg = Instance.new("Frame")
-loadBarBg.Size = UDim2.new(0, 220, 0, 5)
-loadBarBg.Position = UDim2.new(0.5, -110, 0, 110)
-loadBarBg.BackgroundColor3 = Color3.fromRGB(22, 22, 30)
+loadBarBg.Size = UDim2.new(0, 280, 0, 6)
+loadBarBg.Position = UDim2.new(0.5, -140, 0, 146)
+loadBarBg.BackgroundColor3 = Color3.fromRGB(20, 20, 28)
 loadBarBg.BorderSizePixel = 0
 loadBarBg.Parent = loadWrapper
 
@@ -142,22 +180,60 @@ local loadBarFillCorner = Instance.new("UICorner")
 loadBarFillCorner.CornerRadius = UDim.new(1, 0)
 loadBarFillCorner.Parent = loadBarFill
 
-TweenService:Create(loadIcon, TweenInfo.new(0.4), {TextTransparency = 0}):Play()
-TweenService:Create(loadTitle, TweenInfo.new(0.4), {TextTransparency = 0}):Play()
-TweenService:Create(loadSubtitle, TweenInfo.new(0.4), {TextTransparency = 0}):Play()
+-- Animação de Entrada dos Elementos de Carregamento
+TweenService:Create(loadIcon, TweenInfo.new(0.5, Enum.EasingStyle.Back), {TextTransparency = 0}):Play()
+TweenService:Create(loadTitle, TweenInfo.new(0.5), {TextTransparency = 0}):Play()
+TweenService:Create(loadStatus, TweenInfo.new(0.5), {TextTransparency = 0}):Play()
+TweenService:Create(percentLabel, TweenInfo.new(0.5), {TextTransparency = 0}):Play()
 
+-- Loop para girar o anel sci-fi suavemente durante o carregamento
+local ringConn
+ringConn = RunService.RenderStepped:Connect(function(dt)
+	if sciFiRing and sciFiRing.Parent then
+		sciFiRing.Rotation = sciFiRing.Rotation + (dt * 90)
+	else
+		if ringConn then ringConn:Disconnect() end
+	end
+end)
+
+-- Processo de Carregamento em Fases Realistas
 task.spawn(function()
-	TweenService:Create(loadBarFill, TweenInfo.new(0.9, Enum.EasingStyle.Sine), {Size = UDim2.new(1, 0, 1, 0)}):Play()
-	task.wait(1.0)
+	local steps = {
+		{progress = 0.25, text = "Carregando módulos do Blox Fruits..."},
+		{progress = 0.55, text = "Injetando sistemas ESP e Player..."},
+		{progress = 0.85, text = "Sincronizando ambiente e texturas..."},
+		{progress = 1.00, text = "Inicialização concluída com sucesso!"}
+	}
 	
-	local fadeOut = TweenInfo.new(0.3)
+	local currentTweenTime = 0.35
+	for _, step in ipairs(steps) do
+		loadStatus.Text = step.text
+		TweenService:Create(loadBarFill, TweenInfo.new(currentTweenTime, Enum.EasingStyle.Sine, Enum.EasingDirection.Out), {
+			Size = UDim2.new(step.progress, 0, 1, 0)
+		}):Play()
+		
+		-- Atualiza a porcentagem visualmente alinhada com o tamanho da barra
+		local targetPercent = math.floor(step.progress * 100)
+		percentLabel.Text = targetPercent .. "%"
+		
+		task.wait(currentTweenTime + 0.1)
+	end
+	
+	if ringConn then ringConn:Disconnect() end
+	task.wait(0.2)
+	
+	-- Efeito de saída cinematográfico (Fade Out)
+	local fadeOut = TweenInfo.new(0.4, Enum.EasingStyle.Quad)
 	TweenService:Create(loadWrapper, fadeOut, {BackgroundTransparency = 1}):Play()
 	TweenService:Create(loadIcon, fadeOut, {TextTransparency = 1}):Play()
 	TweenService:Create(loadTitle, fadeOut, {TextTransparency = 1}):Play()
-	TweenService:Create(loadSubtitle, fadeOut, {TextTransparency = 1}):Play()
+	TweenService:Create(loadStatus, fadeOut, {TextTransparency = 1}):Play()
+	TweenService:Create(percentLabel, fadeOut, {TextTransparency = 1}):Play()
 	TweenService:Create(loadBarBg, fadeOut, {BackgroundTransparency = 1}):Play()
 	TweenService:Create(loadBarFill, fadeOut, {BackgroundTransparency = 1}):Play()
-	task.wait(0.3)
+	TweenService:Create(sciFiRing, fadeOut, {BackgroundTransparency = 1}):Play()
+	
+	task.wait(0.4)
 	loadWrapper:Destroy()
 	
 	showMainPanel()
@@ -285,6 +361,7 @@ function showMainPanel()
 			local newWidth = math.clamp(startSize.X + delta.X, 360, 800)
 			local newHeight = math.clamp(startSize.Y + delta.Y, 220, 550)
 			mainPanel.Size = UDim2.new(0, newWidth, 0, newHeight)
+			currentPanelSize = mainPanel.Size
 		end
 	end)
 
@@ -345,6 +422,7 @@ function showMainPanel()
 	createControlButton("X", function() screenGui:Destroy() end)
 
 	createControlButton("-", function()
+		currentPanelSize = mainPanel.Size
 		TweenService:Create(mainPanel, TweenInfo.new(0.25, Enum.EasingStyle.Quad), {Size = UDim2.new(0, 0, 0, 0)}):Play()
 		task.wait(0.25)
 		mainPanel.Visible = false
@@ -357,7 +435,7 @@ function showMainPanel()
 		task.wait(0.18)
 		floatingBtn.Visible = false
 		mainPanel.Visible = true
-		TweenService:Create(mainPanel, TweenInfo.new(0.35, Enum.EasingStyle.Back, Enum.EasingDirection.Out), {Size = panelSize}):Play()
+		TweenService:Create(mainPanel, TweenInfo.new(0.35, Enum.EasingStyle.Back, Enum.EasingDirection.Out), {Size = currentPanelSize}):Play()
 	end)
 
 	-----------------------------------------------------------------
@@ -606,7 +684,6 @@ function showMainPanel()
 		cCorner.CornerRadius = UDim.new(0, 4)
 		cCorner.Parent = canvas
 
-		-- Gradiente Branco Horizontal (Saturação)
 		local whiteGradientFrame = Instance.new("Frame")
 		whiteGradientFrame.Size = UDim2.new(1, 0, 1, 0)
 		whiteGradientFrame.BackgroundColor3 = Color3.fromRGB(255, 255, 255)
@@ -627,7 +704,6 @@ function showMainPanel()
 		})
 		wGradient.Parent = whiteGradientFrame
 
-		-- Gradiente Preto Vertical (Brilho/Valor)
 		local blackGradientFrame = Instance.new("Frame")
 		blackGradientFrame.Size = UDim2.new(1, 0, 1, 0)
 		blackGradientFrame.BackgroundColor3 = Color3.fromRGB(0, 0, 0)
@@ -765,7 +841,6 @@ function showMainPanel()
 		label.TextXAlignment = Enum.TextXAlignment.Left
 		label.Parent = toggleFrame
 
-		-- Botão de Ativar (Toggle) na Direita
 		local toggleBtn = Instance.new("TextButton")
 		toggleBtn.Size = UDim2.new(0, 28, 0, 16)
 		toggleBtn.Position = UDim2.new(1, -34, 0.5, -8)
@@ -787,7 +862,6 @@ function showMainPanel()
 		cCorner.CornerRadius = UDim.new(1, 0)
 		cCorner.Parent = circle
 
-		-- Botão de Cor Individual posicionado à esquerda do botão Toggle
 		local colorBtn = Instance.new("TextButton")
 		colorBtn.Size = UDim2.new(0, 18, 0, 14)
 		colorBtn.Position = UDim2.new(1, -58, 0.5, -7)
@@ -828,7 +902,6 @@ function showMainPanel()
 		cnCorner.CornerRadius = UDim.new(0, 4)
 		cnCorner.Parent = canvas
 
-		-- Gradiente Branco Horizontal (Saturação) no ESP Toggle
 		local whiteGradientFrame = Instance.new("Frame")
 		whiteGradientFrame.Size = UDim2.new(1, 0, 1, 0)
 		whiteGradientFrame.BackgroundColor3 = Color3.fromRGB(255, 255, 255)
@@ -849,7 +922,6 @@ function showMainPanel()
 		})
 		wGradient.Parent = whiteGradientFrame
 
-		-- Gradiente Preto Vertical (Brilho/Valor) no ESP Toggle
 		local blackGradientFrame = Instance.new("Frame")
 		blackGradientFrame.Size = UDim2.new(1, 0, 1, 0)
 		blackGradientFrame.BackgroundColor3 = Color3.fromRGB(0, 0, 0)
@@ -1108,7 +1180,7 @@ function showMainPanel()
 	addToggle(secFisico, "Infinite Jump (Pulo Infinito)", function(state) _G_InfiniteJumpEnabled = state end)
 
 	-----------------------------------------------------------------
-	-- ABA VISUAL (ESP PLAYERS COMPLETO E ORGANIZADO)
+	-- ABA VISUAL
 	-----------------------------------------------------------------
 	local visualPage = pages["Visual"]
 	local secEspPlayers = createSection(visualPage, "👁️ ESP Players")
@@ -1161,7 +1233,7 @@ function showMainPanel()
 	end)
 
 	TweenService:Create(mainPanel, TweenInfo.new(0.35, Enum.EasingStyle.Back, Enum.EasingDirection.Out), {
-		Size = panelSize
+		Size = currentPanelSize
 	}):Play()
 end
 
@@ -1216,7 +1288,6 @@ RunService.RenderStepped:Connect(function()
 				local cache = espDrawings[targetPlayer]
 				local head = tChar:FindFirstChild("Head")
 
-				-- 1. Box ESP
 				if _G_EspBox and onScreen then
 					local headPos = head and camera:WorldToViewportPoint(head.Position + Vector3.new(0, 0.5, 0)) or pos
 					local legPos = camera:WorldToViewportPoint(hrp.Position - Vector3.new(0, 3, 0))
@@ -1232,7 +1303,6 @@ RunService.RenderStepped:Connect(function()
 					cache.Box.Visible = false
 				end
 
-				-- 2. Line / Tracers ESP
 				if _G_EspLine and onScreen then
 					cache.Line.From = Vector2.new(camera.ViewportSize.X / 2, camera.ViewportSize.Y)
 					cache.Line.To = Vector2.new(pos.X, pos.Y)
@@ -1243,7 +1313,6 @@ RunService.RenderStepped:Connect(function()
 					cache.Line.Visible = false
 				end
 
-				-- 3. Chams (Highlight)
 				local highlight = tChar:FindFirstChild("AetherisHighlight")
 				if _G_EspChams then
 					if not highlight then
@@ -1258,7 +1327,6 @@ RunService.RenderStepped:Connect(function()
 					highlight.Enabled = false
 				end
 
-				-- 4. Health Bar
 				if _G_EspHealth and onScreen then
 					local hum = tChar.Humanoid
 					local headPos = head and camera:WorldToViewportPoint(head.Position + Vector3.new(0, 0.5, 0)) or pos
@@ -1285,7 +1353,6 @@ RunService.RenderStepped:Connect(function()
 					cache.HealthBarFill.Visible = false
 				end
 
-				-- 5. Name ESP
 				if _G_EspName and onScreen then
 					cache.NameText.Text = targetPlayer.Name
 					cache.NameText.Size = 12
@@ -1298,7 +1365,6 @@ RunService.RenderStepped:Connect(function()
 					cache.NameText.Visible = false
 				end
 
-				-- 6. Distance ESP
 				if _G_EspDistance and onScreen then
 					local dist = math.floor((camera.CFrame.Position - hrp.Position).Magnitude)
 					cache.DistText.Text = "[" .. dist .. "m]"
@@ -1312,7 +1378,6 @@ RunService.RenderStepped:Connect(function()
 					cache.DistText.Visible = false
 				end
 
-				-- 7. Head Dot ESP
 				if _G_EspHead and head and onScreen then
 					local headPos = camera:WorldToViewportPoint(head.Position)
 					cache.HeadDot.Radius = 4
