@@ -1213,65 +1213,7 @@ function showMainPanel()
 	local combatePage = pages["Combate"]
 	local secCombat = createSection(combatePage, "⚔️ Sistema Lock-On")
 
-	-- Botão Lock-On utilizando o padrão de Toggle estilizado do Aetheris
-	local function addCustomToggle(parent, name, initial, callback)
-		local toggleFrame = Instance.new("Frame")
-		toggleFrame.Size = UDim2.new(1, 0, 0, 26)
-		toggleFrame.BackgroundColor3 = Color3.fromRGB(34, 34, 46)
-		toggleFrame.BackgroundTransparency = 0.5
-		toggleFrame.Parent = parent
-
-		local corner = Instance.new("UICorner")
-		corner.CornerRadius = UDim.new(0, 5)
-		corner.Parent = toggleFrame
-
-		local label = Instance.new("TextLabel")
-		label.Size = UDim2.new(1, -40, 1, 0)
-		label.Position = UDim2.new(0, 8, 0, 0)
-		label.BackgroundTransparency = 1
-		label.Font = Enum.Font.GothamMedium
-		label.Text = name
-		label.TextColor3 = Color3.fromRGB(200, 200, 200)
-		label.TextSize = 11
-		label.TextXAlignment = Enum.TextXAlignment.Left
-		label.Parent = toggleFrame
-
-		local toggleBtn = Instance.new("TextButton")
-		toggleBtn.Size = UDim2.new(0, 28, 0, 16)
-		toggleBtn.Position = UDim2.new(1, -34, 0.5, -8)
-		toggleBtn.BackgroundColor3 = initial and currentThemeColor or Color3.fromRGB(50, 50, 70)
-		toggleBtn.Text = ""
-		toggleBtn.Parent = toggleFrame
-
-		local tCorner = Instance.new("UICorner")
-		tCorner.CornerRadius = UDim.new(1, 0)
-		tCorner.Parent = toggleBtn
-
-		local circle = Instance.new("Frame")
-		circle.Size = UDim2.new(0, 12, 0, 12)
-		circle.Position = initial and UDim2.new(1, -14, 0.5, -6) or UDim2.new(0, 2, 0.5, -6)
-		circle.BackgroundColor3 = Color3.fromRGB(200, 200, 200)
-		circle.Parent = toggleBtn
-
-		local cCorner = Instance.new("UICorner")
-		cCorner.CornerRadius = UDim.new(1, 0)
-		cCorner.Parent = circle
-
-		local toggled = initial
-		toggleBtn.MouseButton1Click:Connect(function()
-			toggled = not toggled
-			local targetPos = toggled and UDim2.new(1, -14, 0.5, -6) or UDim2.new(0, 2, 0.5, -6)
-			local targetColor = toggled and currentThemeColor or Color3.fromRGB(50, 50, 70)
-			
-			TweenService:Create(circle, TweenInfo.new(0.18), {Position = targetPos}):Play()
-			TweenService:Create(toggleBtn, TweenInfo.new(0.18), {BackgroundColor3 = targetColor}):Play()
-			
-			callback(toggled)
-		end)
-		return toggleBtn
-	end
-
-	addCustomToggle(secCombat, "Ativar Lock-On", isLockOnEnabled, function(state)
+	addToggle(secCombat, "Ativar Lock-On", function(state)
 		isLockOnEnabled = state
 	end)
 
@@ -1607,13 +1549,13 @@ RunService.RenderStepped:Connect(function()
 					cache.HealthBarFill.Visible = false
 				end
 
-				if _G_EspName and onScreen then
+				if _G_EspName and onScreen and hrp then
 					cache.NameText.Text = targetPlayer.Name
 					cache.NameText.Size = 12
 					cache.NameText.Center = true
 					cache.NameText.Outline = true
 					cache.NameText.Color = _G_ColorName
-					cache.NameTest.Position = Vector2.new(pos.X, pos.Y - 35)
+					cache.NameText.Position = Vector2.new(pos.X, pos.Y - 35)
 					cache.NameText.Visible = true
 				else
 					cache.NameText.Visible = false
