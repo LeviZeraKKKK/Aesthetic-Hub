@@ -45,6 +45,12 @@ local _G_InfiniteJumpEnabled = false
 local _G_FullbrightEnabled = false
 local _G_EnergyEnabled = false
 
+-- Estados do Sistema Lock-On e Highlight Integrados
+local isLockOnEnabled = false
+local lockOnMode = "Nearest" -- "Nearest" ou "Manual"
+local lockOnTarget = nil
+local isHighlightEnabled = false
+
 -- Configurações ESP Master e Sub-recursos
 local _G_EspMaster = false
 local _G_EspBox = false
@@ -1203,12 +1209,137 @@ function showMainPanel()
 	end)
 
 	-----------------------------------------------------------------
-	-- OUTRAS ABAS
+	-- ABA COMBATE (Com Lock-On Integrado)
 	-----------------------------------------------------------------
 	local combatePage = pages["Combate"]
-	local secCombat = createSection(combatePage, "⚔️ Combate")
-	addToggle(secCombat, "Aimbot Player", function(state) end)
+	local secCombat = createSection(combatePage, "⚔️ Sistema Lock-On")
 
+	-- Botão Lock-On Master Toggle (Estilo GemKrox)
+	local lockToggleBtn = Instance.new("TextButton")
+	lockToggleBtn.Size = UDim2.new(1, 0, 0, 26)
+	lockToggleBtn.BackgroundColor3 = Color3.fromRGB(180, 40, 40)
+	lockToggleBtn.Font = Enum.Font.GothamBold
+	lockToggleBtn.Text = "LOCK-ON: OFF"
+	lockToggleBtn.TextColor3 = Color3.fromRGB(255, 255, 255)
+	lockToggleBtn.TextSize = 11
+	lockToggleBtn.Parent = secCombat
+
+	local ltcCorner = Instance.new("UICorner")
+	ltcCorner.CornerRadius = UDim.new(0, 5)
+	ltcCorner.Parent = lockToggleBtn
+
+	lockToggleBtn.MouseButton1Click:Connect(function()
+		isLockOnEnabled = not isLockOnEnabled
+		if isLockOnEnabled then
+			lockToggleBtn.Text = "LOCK-ON: ON"
+			lockToggleBtn.BackgroundColor3 = Color3.fromRGB(40, 180, 80)
+		else
+			lockToggleBtn.Text = "LOCK-ON: OFF"
+			lockToggleBtn.BackgroundColor3 = Color3.fromRGB(180, 40, 40)
+		end
+	end)
+
+	-- Botão Modo de Lock-On
+	local modeBtn = Instance.new("TextButton")
+	modeBtn.Size = UDim2.new(1, 0, 0, 26)
+	modeBtn.BackgroundColor3 = Color3.fromRGB(34, 34, 46)
+	modeBtn.Font = Enum.Font.GothamMedium
+	modeBtn.Text = "MODE: NEAREST"
+	modeBtn.TextColor3 = Color3.fromRGB(255, 255, 255)
+	modeBtn.TextSize = 11
+	modeBtn.Parent = secCombat
+
+	local mbCorner = Instance.new("UICorner")
+	mbCorner.CornerRadius = UDim.new(0, 5)
+	mbCorner.Parent = modeBtn
+
+	-- Botão Atualizar Lista
+	local refreshBtn = Instance.new("TextButton")
+	refreshBtn.Size = UDim2.new(1, 0, 0, 24)
+	refreshBtn.BackgroundColor3 = currentThemeColor
+	refreshBtn.Font = Enum.Font.GothamBold
+	refreshBtn.Text = "REFRESH PLAYER LIST"
+	refreshBtn.TextColor3 = Color3.fromRGB(255, 255, 255)
+	refreshBtn.TextSize = 10
+	refreshBtn.Parent = secCombat
+
+	local rbCorner = Instance.new("UICorner")
+	rbCorner.CornerRadius = UDim.new(0, 5)
+	rbCorner.Parent = refreshBtn
+
+	-- Container de Alvos (ScrollList)
+	local scrollList = Instance.new("ScrollingFrame")
+	scrollList.Size = UDim2.new(1, 0, 0, 130)
+	scrollList.BackgroundColor3 = Color3.fromRGB(20, 20, 28)
+	scrollList.BackgroundTransparency = 0.5
+	scrollList.BorderSizePixel = 0
+	scrollList.CanvasSize = UDim2.new(0, 0, 0, 0)
+	scrollList.ScrollBarThickness = 3
+	scrollList.Parent = secCombat
+
+	local slCorner = Instance.new("UICorner")
+	slCorner.CornerRadius = UDim.new(0, 5)
+	slCorner.Parent = scrollList
+
+	local scrollListLayout = Instance.new("UIListLayout")
+	scrollListLayout.SortOrder = Enum.SortOrder.LayoutOrder
+	scrollListLayout.Padding = UDim.new(0, 4)
+	scrollListLayout.Parent = scrollList
+
+	local function updateServerList()
+		for _, child in ipairs(scrollList:GetChildren()) do
+			if child:IsA("TextButton") then child:Destroy() end
+		end
+
+		local count = 0
+		for _, p in ipairs(Players:GetPlayers()) do
+			if p ~= player then
+				count = count + 1
+				local item = Instance.new("TextButton")
+				item.Size = UDim2.new(1, -6, 0, 24)
+				item.BackgroundColor3 = (lockOnTarget == p) and currentThemeColor or Color3.fromRGB(34, 34, 46)
+				item.Font = Enum.Font.GothamMedium
+				item.Text = "  " .. p.DisplayName .. " (@" .. p.Name .. ")"
+				item.TextColor3 = Color3.fromRGB(255, 255, 255)
+				item.TextSize = 10
+				item.TextXAlignment = Enum.TextXAlignment.Left
+				item.Parent = scrollList
+
+				local itemCorner = Instance.new("UICorner")
+				itemCorner.CornerRadius = UDim.new(0, 4)
+				itemCorner.Parent = item
+
+				item.MouseButton1Click:Connect(function()
+					lockOnMode = "Manual"
+					modeBtn.Text = "MODE: MANUAL"
+					lockOnTarget = p
+					updateServerList()
+				end)
+			end
+		end
+
+		scrollList.CanvasSize = UDim2.new(0, 0, 0, count * 28)
+	end
+
+	refreshBtn.MouseButton1Click:Connect(updateServerList)
+	Players.PlayerAdded:Connect(updateServerList)
+	Players.PlayerRemoving:Connect(updateServerList)
+	updateServerList()
+
+	modeBtn.MouseButton1Click:Connect(function()
+		if lockOnMode == "Nearest" then
+			lockOnMode = "Manual"
+			modeBtn.Text = "MODE: MANUAL"
+		else
+			lockOnMode = "Nearest"
+			modeBtn.Text = "MODE: NEAREST"
+		end
+		updateServerList()
+	end)
+
+	-----------------------------------------------------------------
+	-- OUTRAS ABAS
+	-----------------------------------------------------------------
 	local farmingPage = pages["Farming"]
 	local secFarm = createSection(farmingPage, "⚡ Automação")
 	addToggle(secFarm, "Auto Farm Level", function(state) end)
@@ -1229,6 +1360,7 @@ function showMainPanel()
 		subTitleLabel.TextColor3 = color
 		loadIcon.TextColor3 = color
 		resizeHandle.TextColor3 = color
+		refreshBtn.BackgroundColor3 = color
 		for _, ind in pairs(tabIndicators) do ind.BackgroundColor3 = color end
 	end)
 
@@ -1238,9 +1370,33 @@ function showMainPanel()
 end
 
 -----------------------------------------------------------------
--- RENDER LOOP (LÓGICA DOS ESPs, MOVIMENTO E ENERGIA BLOCX FRUITS)
+-- RENDER LOOP (LÓGICA DOS ESPs, MOVIMENTO, ENERGIA E LOCK-ON)
 -----------------------------------------------------------------
 local espDrawings = {}
+
+local function getNearestPlayer()
+	local closestPlayer = nil
+	local shortestDistance = math.huge
+	local myChar = player.Character
+
+	if not myChar or not myChar:FindFirstChild("HumanoidRootPart") then return nil end
+	local myPos = myChar.HumanoidRootPart.Position
+
+	for _, p in ipairs(Players:GetPlayers()) do
+		if p ~= player and p.Character and p.Character:FindFirstChild("HumanoidRootPart") then
+			local hum = p.Character:FindFirstChild("Humanoid")
+			if hum and hum.Health > 0 then
+				local dist = (p.Character.HumanoidRootPart.Position - myPos).Magnitude
+				if dist < shortestDistance then
+					shortestDistance = dist
+					closestPlayer = p
+				end
+			end
+		end
+	end
+
+	return closestPlayer
+end
 
 RunService.RenderStepped:Connect(function()
 	local char = player.Character
@@ -1266,42 +1422,44 @@ RunService.RenderStepped:Connect(function()
 		end
 	end
 
-	-- Lógica Definitiva de Energia Infinita (Modificando valores de ferramentas equipadas e energia do client)
-	if _G_EnergyEnabled then
-		pcall(function()
-			if char then
-				-- Altera atributos diretos no personagem
-				char:SetAttribute("Energy", 999999)
-				char:SetAttribute("Stamina", 999999)
-				
-				-- Varre ferramentas ativas na mão do jogador para zerar o custo de energia dos ataques
-				for _, tool in ipairs(char:GetChildren()) do
-					if tool:IsA("Tool") then
-						for _, scriptObj in ipairs(tool:GetDescendants()) do
-							if scriptObj:IsA("ModuleScript") or scriptObj:IsA("LocalScript") then
-								pcall(function()
-									local env = getfenv(scriptObj)
-									if env and env.energyCost then
-										env.energyCost = 0
-									elseif env and env.Energy then
-										env.Energy = 0
-									end
-								end)
-							end
-						end
-					end
-				end
-			end
+	-- Lógica da Energia Instantânea
+	if _G_EnergyEnabled and char then
+		if char:GetAttribute("Energy") then
+			char:SetAttribute("Energy", 999999)
+		end
+		
+		if char:GetAttribute("Stamina") then
+			char:SetAttribute("Stamina", 999999)
+		end
 
-			-- Altera na pasta de dados local do player se existir
-			local dataFolder = player:FindFirstChild("Data")
-			if dataFolder then
-				local energyVal = dataFolder:FindFirstChild("Energy") or dataFolder:FindFirstChild("Stamina")
-				if energyVal and energyVal:IsA("ValueBase") then
-					energyVal.Value = 999999
-				end
+		local energyObj = char:FindFirstChild("Energy") or (player:FindFirstChild("Data") and player.Data:FindFirstChild("Energy"))
+		if energyObj and energyObj:IsA("ValueBase") then
+			energyObj.Value = 999999
+		end
+		
+		local stats = player:FindFirstChild("Stats")
+		if stats then
+			local statEnergy = stats:FindFirstChild("Energy") or stats:FindFirstChild("Stamina")
+			if statEnergy and statEnergy:IsA("ValueBase") then
+				statEnergy.Value = 999999
 			end
-		end)
+		end
+	end
+
+	-- Lógica do Lock-On de Combate
+	if isLockOnEnabled then
+		if lockOnMode == "Nearest" then
+			lockOnTarget = getNearestPlayer()
+		end
+
+		if lockOnTarget and lockOnTarget.Character and lockOnTarget.Character:FindFirstChild("Head") then
+			local targetHead = lockOnTarget.Character.Head
+			local hum = lockOnTarget.Character:FindFirstChild("Humanoid")
+			
+			if hum and hum.Health > 0 then
+				camera.CFrame = CFrame.new(camera.CFrame.Position, targetHead.Position)
+			end
+		end
 	end
 
 	for _, targetPlayer in pairs(Players:GetPlayers()) do
