@@ -43,6 +43,7 @@ local _G_JumpPowerValue = 50
 local _G_NoclipEnabled = false
 local _G_InfiniteJumpEnabled = false
 local _G_FullbrightEnabled = false
+local _G_EnergyEnabled = false
 
 -- Configurações ESP Master e Sub-recursos
 local _G_EspMaster = false
@@ -212,7 +213,6 @@ task.spawn(function()
 			Size = UDim2.new(step.progress, 0, 1, 0)
 		}):Play()
 		
-		-- Atualiza a porcentagem visualmente alinhada com o tamanho da barra
 		local targetPercent = math.floor(step.progress * 100)
 		percentLabel.Text = targetPercent .. "%"
 		
@@ -222,7 +222,6 @@ task.spawn(function()
 	if ringConn then ringConn:Disconnect() end
 	task.wait(0.2)
 	
-	-- Efeito de saída cinematográfico (Fade Out)
 	local fadeOut = TweenInfo.new(0.4, Enum.EasingStyle.Quad)
 	TweenService:Create(loadWrapper, fadeOut, {BackgroundTransparency = 1}):Play()
 	TweenService:Create(loadIcon, fadeOut, {TextTransparency = 1}):Play()
@@ -1178,6 +1177,7 @@ function showMainPanel()
 	local secFisico = createSection(playerPage, "⚙️ Habilidades Físicas")
 	addToggle(secFisico, "Noclip (Atravessar Paredes)", function(state) _G_NoclipEnabled = state end)
 	addToggle(secFisico, "Infinite Jump (Pulo Infinito)", function(state) _G_InfiniteJumpEnabled = state end)
+	addToggle(secFisico, "Energia Instantânea", function(state) _G_EnergyEnabled = state end)
 
 	-----------------------------------------------------------------
 	-- ABA VISUAL
@@ -1238,7 +1238,7 @@ function showMainPanel()
 end
 
 -----------------------------------------------------------------
--- RENDER LOOP (LÓGICA DOS ESPs E ATRIBUTOS DE MOVIMENTO)
+-- RENDER LOOP (LÓGICA DOS ESPs, MOVIMENTO E ENERGIA)
 -----------------------------------------------------------------
 local espDrawings = {}
 
@@ -1263,6 +1263,30 @@ RunService.RenderStepped:Connect(function()
 	if _G_NoclipEnabled and char then
 		for _, part in pairs(char:GetDescendants()) do
 			if part:IsA("BasePart") then part.CanCollide = false end
+		end
+	end
+
+	-- Lógica da Energia Instantânea
+	if _G_EnergyEnabled and char then
+		if char:GetAttribute("Energy") then
+			char:SetAttribute("Energy", 999999)
+		end
+		
+		if char:GetAttribute("Stamina") then
+			char:SetAttribute("Stamina", 999999)
+		end
+
+		local energyObj = char:FindFirstChild("Energy") or (player:FindFirstChild("Data") and player.Data:FindFirstChild("Energy"))
+		if energyObj and energyObj:IsA("ValueBase") then
+			energyObj.Value = 999999
+		end
+		
+		local stats = player:FindFirstChild("Stats")
+		if stats then
+			local statEnergy = stats:FindFirstChild("Energy") or stats:FindFirstChild("Stamina")
+			if statEnergy and statEnergy:IsA("ValueBase") then
+				statEnergy.Value = 999999
+			end
 		end
 	end
 
