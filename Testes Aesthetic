@@ -55,6 +55,7 @@ local _G_FilterDistanceMax = 500
 local _G_FilterLowestHP = false
 local _G_FilterCrosshair = false
 local _G_FilterHoldingItem = false
+local _G_FilterClosest = false -- Novo filtro: Mais perto geral
 
 -- Estados do FOV Customizável
 local _G_FovVisible = false
@@ -513,9 +514,10 @@ function showMainPanel()
 		return page
 	end
 
+	-- Aba "Aim Lock" incluída no lugar de Combate
 	local tabs = {
 		{Name = "Player", Icon = "👤"},
-		{Name = "Combate", Icon = "⚔️"},
+		{Name = "Aim Lock", Icon = "🎯"},
 		{Name = "Visual", Icon = "👁️"},
 		{Name = "Farming", Icon = "⚡"},
 		{Name = "Fruta", Icon = "🍎"},
@@ -1240,7 +1242,7 @@ function showMainPanel()
 	addEspToggleWithColor(secEspPlayers, "Chams (Highlight)", _G_ColorChams, function(c) _G_ColorChams = c end, function(s) _G_EspChams = s end)
 	addEspToggleWithColor(secEspPlayers, "Health Bar", _G_ColorHealth, function(c) _G_ColorHealth = c end, function(s) _G_EspHealth = s end)
 	addEspToggleWithColor(secEspPlayers, "Name ESP", _G_ColorName, function(c) _G_ColorName = c end, function(s) _G_EspName = s end)
-	addEspToggleWithColor(secEspPlayers, "Distance ESP", _G_ColorDistance, function(c) _G_ColorDistance = c end, function(s) _G_EspDistance = s end)
+	addEspToggleWithColor(secEspPlayers, &apos;Distance ESP&apos;, _G_ColorDistance, function(c) _G_ColorDistance = c end, function(s) _G_EspDistance = s end)
 	addEspToggleWithColor(secEspPlayers, "Head Dot ESP", _G_ColorHead, function(c) _G_ColorHead = c end, function(s) _G_EspHead = s end)
 
 	local secWorld = createSection(visualPage, "Visual do Mapa", "🌐")
@@ -1252,10 +1254,10 @@ function showMainPanel()
 	end)
 
 	-----------------------------------------------------------------
-	-- ABA COMBATE (Com Configurações de FOV Personalizável na Seção)
+	-- ABA AIM LOCK (Tudo centralizado aqui)
 	-----------------------------------------------------------------
-	local combatePage = pages["Combate"]
-	local secCombat = createSection(combatePage, "Sistema Lock-On", "⚔️")
+	local aimLockPage = pages["Aim Lock"]
+	local secCombat = createSection(aimLockPage, "Sistema Lock-On", "⚔️")
 
 	addToggle(secCombat, "Ativar Lock-On", function(state)
 		isLockOnEnabled = state
@@ -1296,8 +1298,8 @@ function showMainPanel()
 	msCorner.CornerRadius = UDim.new(0, 4)
 	msCorner.Parent = modeSwitchBtn
 
-	-- Seção de FOV & Filtros de Alvo unificada na aba Combate
-	local secFilters = createSection(combatePage, "FOV & Filtros de Alvo", "🎯")
+	-- Seção de FOV & Filtros de Alvo na aba Aim Lock
+	local secFilters = createSection(aimLockPage, "FOV & Filtros de Alvo", "🎯")
 	addToggle(secFilters, "Ativar Círculo FOV", function(state) _G_FovVisible = state end)
 	addSlider(secFilters, "Raio do FOV", 50, 500, 150, function(val) _G_FovRadius = val end)
 	addSlider(secFilters, "Grossura do FOV", 1, 5, 1, function(val) _G_FovThickness = val end)
@@ -1306,6 +1308,7 @@ function showMainPanel()
 
 	addToggle(secFilters, "Filtro por Distância Máxima", function(state) _G_FilterDistanceEnabled = state end)
 	addSlider(secFilters, "Distância Máxima", 50, 2000, 500, function(val) _G_FilterDistanceMax = val end)
+	addToggle(secFilters, "Mais Perto de Mim (Mais Próximo)", function(state) _G_FilterClosest = state end)
 	addToggle(secFilters, "Priorizar Menor Vida (HP)", function(state) _G_FilterLowestHP = state end)
 	addToggle(secFilters, "Mais Perto da Mira (Crosshair)", function(state) _G_FilterCrosshair = state end)
 	addToggle(secFilters, "Apenas se EU Estiver com Item", function(state) _G_FilterHoldingItem = state end)
@@ -1432,7 +1435,7 @@ function showMainPanel()
 end
 
 -----------------------------------------------------------------
--- RENDER LOOP (LÓGICA DOS ESPs, FOV E LOCK-ON AVANÇADO)
+-- RENDER LOOP (LÓGICA DOS ESPs, FOV E LOCK-ON COM FILTROS)
 -----------------------------------------------------------------
 local espDrawings = {}
 
@@ -1472,6 +1475,11 @@ local function getAdvancedTarget()
 						
 						if not _G_FovVisible or screenDist <= _G_FovRadius then
 							local score = dist
+
+							-- Filtro de mais perto geral
+							if _G_FilterClosest then
+								score = dist
+							end
 
 							if _G_FilterLowestHP then
 								score = hum.Health
