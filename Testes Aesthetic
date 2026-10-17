@@ -47,7 +47,7 @@ local _G_EnergyEnabled = false
 
 -- Estados do Sistema Lock-On
 local isLockOnEnabled = false
-local lockOnMode = "Nearest" -- "Nearest" ou "Manual"
+local lockOnMode = "Nearest"
 local lockOnTarget = nil
 
 -- Configurações ESP Master e Sub-recursos
@@ -69,13 +69,13 @@ local _G_ColorDistance = Color3.fromRGB(200, 200, 255)
 local _G_ColorHead = Color3.fromRGB(255, 100, 100)
 
 -----------------------------------------------------------------
--- TELA DE CARREGAMENTO ULTRA PROFISSIONAL
+-- TELA DE CARREGAMENTO ULTRA PROFISSIONAL (Glass Effect)
 -----------------------------------------------------------------
 local loadWrapper = Instance.new("Frame")
 loadWrapper.Size = UDim2.new(0, 360, 0, 180)
 loadWrapper.Position = UDim2.new(0.5, -180, 0.5, -90)
-loadWrapper.BackgroundColor3 = Color3.fromRGB(12, 12, 18)
-loadWrapper.BackgroundTransparency = 0.1
+loadWrapper.BackgroundColor3 = Color3.fromRGB(14, 14, 22)
+loadWrapper.BackgroundTransparency = 0.25
 loadWrapper.BorderSizePixel = 0
 loadWrapper.ClipsDescendants = true
 loadWrapper.Parent = screenGui
@@ -86,11 +86,11 @@ loadCorner.Parent = loadWrapper
 
 local loadStroke = Instance.new("UIStroke")
 loadStroke.Color = currentThemeColor
-loadStroke.Transparency = 0.2
+loadStroke.Transparency = 0.3
 loadStroke.Thickness = 1.8
 loadStroke.Parent = loadWrapper
 
--- Anel Externo Giratório Decorativo (Sci-Fi Ring)
+-- Anel Externo Giratório Decorativo
 local sciFiRing = Instance.new("Frame")
 sciFiRing.Size = UDim2.new(0, 54, 0, 54)
 sciFiRing.Position = UDim2.new(0.5, -27, 0, 18)
@@ -186,13 +186,12 @@ local loadBarFillCorner = Instance.new("UICorner")
 loadBarFillCorner.CornerRadius = UDim.new(1, 0)
 loadBarFillCorner.Parent = loadBarFill
 
--- Animação de Entrada dos Elementos de Carregamento
+-- Animação de Entrada
 TweenService:Create(loadIcon, TweenInfo.new(0.5, Enum.EasingStyle.Back), {TextTransparency = 0}):Play()
 TweenService:Create(loadTitle, TweenInfo.new(0.5), {TextTransparency = 0}):Play()
 TweenService:Create(loadStatus, TweenInfo.new(0.5), {TextTransparency = 0}):Play()
 TweenService:Create(percentLabel, TweenInfo.new(0.5), {TextTransparency = 0}):Play()
 
--- Loop para girar o anel sci-fi suavemente durante o carregamento
 local ringConn
 ringConn = RunService.RenderStepped:Connect(function(dt)
 	if sciFiRing and sciFiRing.Parent then
@@ -202,7 +201,6 @@ ringConn = RunService.RenderStepped:Connect(function(dt)
 	end
 end)
 
--- Processo de Carregamento em Fases Realistas
 task.spawn(function()
 	local steps = {
 		{progress = 0.25, text = "Carregando módulos do Blox Fruits..."},
@@ -244,15 +242,15 @@ task.spawn(function()
 end)
 
 -----------------------------------------------------------------
--- PAINEL PRINCIPAL
+-- PAINEL PRINCIPAL (Glassmorphism Aprimorado)
 -----------------------------------------------------------------
 function showMainPanel()
 	local mainPanel = Instance.new("Frame")
 	mainPanel.Size = UDim2.new(0, 0, 0, 0)
 	mainPanel.Position = UDim2.new(0.5, 0, 0.5, 0)
 	mainPanel.AnchorPoint = Vector2.new(0.5, 0.5)
-	mainPanel.BackgroundColor3 = Color3.fromRGB(18, 18, 24)
-	mainPanel.BackgroundTransparency = 0.1
+	mainPanel.BackgroundColor3 = Color3.fromRGB(16, 16, 24)
+	mainPanel.BackgroundTransparency = 0.2 -- Efeito Glass translúcido
 	mainPanel.BorderSizePixel = 0
 	mainPanel.ClipsDescendants = true
 	mainPanel.Parent = screenGui
@@ -263,15 +261,25 @@ function showMainPanel()
 
 	local panelStroke = Instance.new("UIStroke")
 	panelStroke.Color = currentThemeColor
-	panelStroke.Transparency = 0.3
+	panelStroke.Transparency = 0.25
 	panelStroke.Thickness = 1.6
 	panelStroke.Parent = mainPanel
+
+	-- Gradiente de Vidro (Glass Shading)
+	local glassGradient = Instance.new("UIGradient")
+	glassGradient.Rotation = 45
+	glassGradient.Transparency = NumberSequence.new({
+		NumberSequenceKeypoint.new(0, 0.1),
+		NumberSequenceKeypoint.new(1, 0.4)
+	})
+	glassGradient.Parent = mainPanel
 
 	-- Botão Flutuante
 	local floatingBtn = Instance.new("TextButton")
 	floatingBtn.Size = UDim2.new(0, 0, 0, 0)
 	floatingBtn.Position = UDim2.new(0, 15, 0.5, -18)
-	floatingBtn.BackgroundColor3 = Color3.fromRGB(18, 18, 24)
+	floatingBtn.BackgroundColor3 = Color3.fromRGB(16, 16, 24)
+	floatingBtn.BackgroundTransparency = 0.2
 	floatingBtn.Font = Enum.Font.GothamBold
 	floatingBtn.Text = "•"
 	floatingBtn.TextColor3 = currentThemeColor
@@ -409,6 +417,7 @@ function showMainPanel()
 		local btn = Instance.new("TextButton")
 		btn.Size = UDim2.new(0, 20, 0, 20)
 		btn.BackgroundColor3 = Color3.fromRGB(28, 28, 38)
+		btn.BackgroundTransparency = 0.3
 		btn.Font = Enum.Font.GothamBold
 		btn.Text = text
 		btn.TextColor3 = Color3.fromRGB(200, 200, 200)
@@ -462,8 +471,8 @@ function showMainPanel()
 	local contentContainer = Instance.new("Frame")
 	contentContainer.Size = UDim2.new(1, -128, 1, -50)
 	contentContainer.Position = UDim2.new(0, 122, 0, 42)
-	contentContainer.BackgroundColor3 = Color3.fromRGB(24, 24, 32)
-	contentContainer.BackgroundTransparency = 0.5
+	contentContainer.BackgroundColor3 = Color3.fromRGB(22, 22, 30)
+	contentContainer.BackgroundTransparency = 0.45 -- Glass Effect
 	contentContainer.BorderSizePixel = 0
 	contentContainer.ClipsDescendants = true
 	contentContainer.Parent = mainPanel
@@ -578,13 +587,13 @@ function showMainPanel()
 	end
 
 	-----------------------------------------------------------------
-	-- COMPONENTES DE UI COMPACTOS
+	-- COMPONENTES DE UI COM ÍCONES MINIMALISTAS & LEDS DE STATUS
 	-----------------------------------------------------------------
-	local function createSection(pageTarget, title)
+	local function createSection(pageTarget, title, iconSymbol)
 		local section = Instance.new("Frame")
 		section.Size = UDim2.new(1, -4, 0, 0)
-		section.BackgroundColor3 = Color3.fromRGB(28, 28, 38)
-		section.BackgroundTransparency = 0.4
+		section.BackgroundColor3 = Color3.fromRGB(26, 26, 36)
+		section.BackgroundTransparency = 0.5 -- Glass Effect
 		section.Parent = pageTarget
 
 		local sCorner = Instance.new("UICorner")
@@ -593,12 +602,24 @@ function showMainPanel()
 
 		local sStroke = Instance.new("UIStroke")
 		sStroke.Color = Color3.fromRGB(45, 45, 60)
+		sStroke.Transparency = 0.4
 		sStroke.Thickness = 1
 		sStroke.Parent = section
 
+		-- Ícone Minimalista da Seção
+		local iconLabel = Instance.new("TextLabel")
+		iconLabel.Size = UDim2.new(0, 20, 0, 20)
+		iconLabel.Position = UDim2.new(0, 8, 0, 3)
+		iconLabel.BackgroundTransparency = 1
+		iconLabel.Font = Enum.Font.GothamBold
+		iconLabel.Text = iconSymbol or "🔹"
+		iconLabel.TextColor3 = currentThemeColor
+		iconLabel.TextSize = 10
+		iconLabel.Parent = section
+
 		local sTitle = Instance.new("TextLabel")
-		sTitle.Size = UDim2.new(1, -16, 0, 20)
-		sTitle.Position = UDim2.new(0, 8, 0, 3)
+		sTitle.Size = UDim2.new(1, -36, 0, 20)
+		sTitle.Position = UDim2.new(0, 28, 0, 3)
 		sTitle.BackgroundTransparency = 1
 		sTitle.Font = Enum.Font.GothamBold
 		sTitle.Text = title
@@ -625,7 +646,7 @@ function showMainPanel()
 		return sContainer
 	end
 
-	-- Color Picker HSV Compacto Real com UIGradient corrigido
+	-- Color Picker HSV Compacto Real com UIGradient
 	local function addColorPicker(parent, title, defaultColor, callback)
 		local pickerFrame = Instance.new("Frame")
 		pickerFrame.Size = UDim2.new(1, 0, 0, 26)
@@ -822,7 +843,7 @@ function showMainPanel()
 		return colorBtn
 	end
 
-	-- ESP Toggle com o botão de cor individual posicionado à esquerda do Toggle
+	-- ESP Toggle com o botão de cor individual e Indicador LED de Status
 	local function addEspToggleWithColor(parent, name, defaultColor, colorCallback, toggleCallback)
 		local toggleFrame = Instance.new("Frame")
 		toggleFrame.Size = UDim2.new(1, 0, 0, 26)
@@ -834,9 +855,20 @@ function showMainPanel()
 		corner.CornerRadius = UDim.new(0, 5)
 		corner.Parent = toggleFrame
 
+		-- LED Indicador de Status Visual
+		local ledIndicator = Instance.new("Frame")
+		ledIndicator.Size = UDim2.new(0, 6, 0, 6)
+		ledIndicator.Position = UDim2.new(0, 8, 0.5, -3)
+		ledIndicator.BackgroundColor3 = Color3.fromRGB(80, 80, 100)
+		ledIndicator.Parent = toggleFrame
+
+		local ledCorner = Instance.new("UICorner")
+		ledCorner.CornerRadius = UDim.new(1, 0)
+		ledCorner.Parent = ledIndicator
+
 		local label = Instance.new("TextLabel")
-		label.Size = UDim2.new(1, -75, 1, 0)
-		label.Position = UDim2.new(0, 8, 0, 0)
+		label.Size = UDim2.new(1, -85, 1, 0)
+		label.Position = UDim2.new(0, 20, 0, 0)
 		label.BackgroundTransparency = 1
 		label.Font = Enum.Font.GothamMedium
 		label.Text = name
@@ -1041,15 +1073,17 @@ function showMainPanel()
 			toggled = not toggled
 			local targetPos = toggled and UDim2.new(1, -14, 0.5, -6) or UDim2.new(0, 2, 0.5, -6)
 			local targetColor = toggled and currentThemeColor or Color3.fromRGB(50, 50, 70)
+			local targetLedColor = toggled and currentThemeColor or Color3.fromRGB(80, 80, 100)
 			
 			TweenService:Create(circle, TweenInfo.new(0.18), {Position = targetPos}):Play()
 			TweenService:Create(toggleBtn, TweenInfo.new(0.18), {BackgroundColor3 = targetColor}):Play()
+			TweenService:Create(ledIndicator, TweenInfo.new(0.18), {BackgroundColor3 = targetLedColor}):Play()
 			
 			toggleCallback(toggled)
 		end)
 	end
 
-	-- Toggle Comum Compacto
+	-- Toggle Comum Compacto com Indicador LED de Status
 	local function addToggle(parent, name, callback)
 		local toggleFrame = Instance.new("Frame")
 		toggleFrame.Size = UDim2.new(1, 0, 0, 26)
@@ -1061,9 +1095,20 @@ function showMainPanel()
 		corner.CornerRadius = UDim.new(0, 5)
 		corner.Parent = toggleFrame
 
+		-- LED Indicador de Status Visual
+		local ledIndicator = Instance.new("Frame")
+		ledIndicator.Size = UDim2.new(0, 6, 0, 6)
+		ledIndicator.Position = UDim2.new(0, 8, 0.5, -3)
+		ledIndicator.BackgroundColor3 = Color3.fromRGB(80, 80, 100)
+		ledIndicator.Parent = toggleFrame
+
+		local ledCorner = Instance.new("UICorner")
+		ledCorner.CornerRadius = UDim.new(1, 0)
+		ledCorner.Parent = ledIndicator
+
 		local label = Instance.new("TextLabel")
-		label.Size = UDim2.new(1, -40, 1, 0)
-		label.Position = UDim2.new(0, 8, 0, 0)
+		label.Size = UDim2.new(1, -50, 1, 0)
+		label.Position = UDim2.new(0, 20, 0, 0)
 		label.BackgroundTransparency = 1
 		label.Font = Enum.Font.GothamMedium
 		label.Text = name
@@ -1098,9 +1143,11 @@ function showMainPanel()
 			toggled = not toggled
 			local targetPos = toggled and UDim2.new(1, -14, 0.5, -6) or UDim2.new(0, 2, 0.5, -6)
 			local targetColor = toggled and currentThemeColor or Color3.fromRGB(50, 50, 70)
+			local targetLedColor = toggled and currentThemeColor or Color3.fromRGB(80, 80, 100)
 			
 			TweenService:Create(circle, TweenInfo.new(0.18), {Position = targetPos}):Play()
 			TweenService:Create(toggleBtn, TweenInfo.new(0.18), {BackgroundColor3 = targetColor}):Play()
+			TweenService:Create(ledIndicator, TweenInfo.new(0.18), {BackgroundColor3 = targetLedColor}):Play()
 			
 			callback(toggled)
 		end)
@@ -1172,14 +1219,14 @@ function showMainPanel()
 	-- ABA PLAYER
 	-----------------------------------------------------------------
 	local playerPage = pages["Player"]
-	local secMovimento = createSection(playerPage, "🏃‍♂️ Movimento")
+	local secMovimento = createSection(playerPage, "Movimento", "🏃‍♂️")
 	addToggle(secMovimento, "Ativar WalkSpeed", function(state) _G_WalkSpeedEnabled = state end)
 	addSlider(secMovimento, "Velocidade", 16, 250, 16, function(val) _G_WalkSpeedValue = val end)
 
 	addToggle(secMovimento, "Ativar JumpPower", function(state) _G_JumpPowerEnabled = state end)
 	addSlider(secMovimento, "Força do Pulo", 50, 300, 50, function(val) _G_JumpPowerValue = val end)
 
-	local secFisico = createSection(playerPage, "⚙️ Habilidades Físicas")
+	local secFisico = createSection(playerPage, "Habilidades Físicas", "⚙️")
 	addToggle(secFisico, "Noclip (Atravessar Paredes)", function(state) _G_NoclipEnabled = state end)
 	addToggle(secFisico, "Infinite Jump (Pulo Infinito)", function(state) _G_InfiniteJumpEnabled = state end)
 	addToggle(secFisico, "Energia Instantânea", function(state) _G_EnergyEnabled = state end)
@@ -1188,7 +1235,7 @@ function showMainPanel()
 	-- ABA VISUAL
 	-----------------------------------------------------------------
 	local visualPage = pages["Visual"]
-	local secEspPlayers = createSection(visualPage, "👁️ ESP Players")
+	local secEspPlayers = createSection(visualPage, "ESP Players", "👁️")
 	addToggle(secEspPlayers, "Ativar ESP Players", function(state) _G_EspMaster = state end)
 
 	addEspToggleWithColor(secEspPlayers, "Box ESP", _G_ColorBox, function(c) _G_ColorBox = c end, function(s) _G_EspBox = s end)
@@ -1199,7 +1246,7 @@ function showMainPanel()
 	addEspToggleWithColor(secEspPlayers, "Distance ESP", _G_ColorDistance, function(c) _G_ColorDistance = c end, function(s) _G_EspDistance = s end)
 	addEspToggleWithColor(secEspPlayers, "Head Dot ESP", _G_ColorHead, function(c) _G_ColorHead = c end, function(s) _G_EspHead = s end)
 
-	local secWorld = createSection(visualPage, "🌐 Visual do Mapa")
+	local secWorld = createSection(visualPage, "Visual do Mapa", "🌐")
 	addToggle(secWorld, "Fullbright (Remover Escuridão)", function(state)
 		_G_FullbrightEnabled = state
 		Lighting.Brightness = _G_FullbrightEnabled and 2 or 1
@@ -1208,16 +1255,15 @@ function showMainPanel()
 	end)
 
 	-----------------------------------------------------------------
-	-- ABA COMBATE (Com Lock-On Integrado no Estilo Aetheris)
+	-- ABA COMBATE
 	-----------------------------------------------------------------
 	local combatePage = pages["Combate"]
-	local secCombat = createSection(combatePage, "⚔️ Sistema Lock-On")
+	local secCombat = createSection(combatePage, "Sistema Lock-On", "⚔️")
 
 	addToggle(secCombat, "Ativar Lock-On", function(state)
 		isLockOnEnabled = state
 	end)
 
-	-- Botão Modo de Lock-On no estilo Aetheris
 	local modeFrame = Instance.new("Frame")
 	modeFrame.Size = UDim2.new(1, 0, 0, 26)
 	modeFrame.BackgroundColor3 = Color3.fromRGB(34, 34, 46)
@@ -1253,7 +1299,6 @@ function showMainPanel()
 	msCorner.CornerRadius = UDim.new(0, 4)
 	msCorner.Parent = modeSwitchBtn
 
-	-- Botão Atualizar Lista
 	local refreshBtn = Instance.new("TextButton")
 	refreshBtn.Size = UDim2.new(1, 0, 0, 26)
 	refreshBtn.BackgroundColor3 = Color3.fromRGB(34, 34, 46)
@@ -1269,7 +1314,6 @@ function showMainPanel()
 	rbCorner.CornerRadius = UDim.new(0, 5)
 	rbCorner.Parent = refreshBtn
 
-	-- Container de Alvos (ScrollList)
 	local scrollList = Instance.new("ScrollingFrame")
 	scrollList.Size = UDim2.new(1, 0, 0, 130)
 	scrollList.BackgroundColor3 = Color3.fromRGB(20, 20, 28)
@@ -1342,17 +1386,17 @@ function showMainPanel()
 	-- OUTRAS ABAS
 	-----------------------------------------------------------------
 	local farmingPage = pages["Farming"]
-	local secFarm = createSection(farmingPage, "⚡ Automação")
+	local secFarm = createSection(farmingPage, "Automação", "⚡")
 	addToggle(secFarm, "Auto Farm Level", function(state) end)
 	addToggle(secFarm, "Fast Attack", function(state) end)
 
 	local frutaPage = pages["Fruta"]
-	local secFruta = createSection(frutaPage, "🍎 Frutas")
+	local secFruta = createSection(frutaPage, "Frutas", "🍎")
 	addToggle(secFruta, "Auto Buy Fruit", function(state) end)
 	addToggle(secFruta, "Auto Store Fruit", function(state) end)
 
 	local configPage = pages["Config"]
-	local secConfig = createSection(configPage, "⚙️ Tema do Hub")
+	local secConfig = createSection(configPage, "Tema do Hub", "⚙️")
 	addColorPicker(secConfig, "Cor Principal do Hub", currentThemeColor, function(color)
 		currentThemeColor = color
 		panelStroke.Color = color
@@ -1422,7 +1466,6 @@ RunService.RenderStepped:Connect(function()
 		end
 	end
 
-	-- Lógica da Energia Instantânea
 	if _G_EnergyEnabled and char then
 		if char:GetAttribute("Energy") then
 			char:SetAttribute("Energy", 999999)
@@ -1446,7 +1489,6 @@ RunService.RenderStepped:Connect(function()
 		end
 	end
 
-	-- Lógica do Lock-On de Combate
 	if isLockOnEnabled then
 		if lockOnMode == "Nearest" then
 			lockOnTarget = getNearestPlayer()
