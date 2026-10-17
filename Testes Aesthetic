@@ -55,7 +55,7 @@ local _G_FilterDistanceMax = 500
 local _G_FilterLowestHP = false
 local _G_FilterCrosshair = false
 local _G_FilterHoldingItem = false
-local _G_FilterClosest = false -- Novo filtro: Mais perto geral
+local _G_FilterClosest = false
 
 -- Estados do FOV Customizável
 local _G_FovVisible = false
@@ -64,7 +64,7 @@ local _G_FovThickness = 1
 local _G_FovTransparency = 0.7
 local _G_ColorFov = Color3.fromRGB(138, 43, 226)
 
--- Proteção segura para a biblioteca Drawing
+-- Proteção segura para a biblioteca Drawing (Evita crash se nil)
 local fovCircleDrawing = nil
 pcall(function()
 	if Drawing and typeof(Drawing.new) == "function" then
@@ -514,7 +514,6 @@ function showMainPanel()
 		return page
 	end
 
-	-- Aba "Aim Lock" incluída no lugar de Combate
 	local tabs = {
 		{Name = "Player", Icon = "👤"},
 		{Name = "Aim Lock", Icon = "🎯"},
@@ -1242,7 +1241,7 @@ function showMainPanel()
 	addEspToggleWithColor(secEspPlayers, "Chams (Highlight)", _G_ColorChams, function(c) _G_ColorChams = c end, function(s) _G_EspChams = s end)
 	addEspToggleWithColor(secEspPlayers, "Health Bar", _G_ColorHealth, function(c) _G_ColorHealth = c end, function(s) _G_EspHealth = s end)
 	addEspToggleWithColor(secEspPlayers, "Name ESP", _G_ColorName, function(c) _G_ColorName = c end, function(s) _G_EspName = s end)
-	addEspToggleWithColor(secEspPlayers, &apos;Distance ESP&apos;, _G_ColorDistance, function(c) _G_ColorDistance = c end, function(s) _G_EspDistance = s end)
+	addEspToggleWithColor(secEspPlayers, "Distance ESP", _G_ColorDistance, function(c) _G_ColorDistance = c end, function(s) _G_EspDistance = s end)
 	addEspToggleWithColor(secEspPlayers, "Head Dot ESP", _G_ColorHead, function(c) _G_ColorHead = c end, function(s) _G_EspHead = s end)
 
 	local secWorld = createSection(visualPage, "Visual do Mapa", "🌐")
@@ -1254,7 +1253,7 @@ function showMainPanel()
 	end)
 
 	-----------------------------------------------------------------
-	-- ABA AIM LOCK (Tudo centralizado aqui)
+	-- ABA AIM LOCK
 	-----------------------------------------------------------------
 	local aimLockPage = pages["Aim Lock"]
 	local secCombat = createSection(aimLockPage, "Sistema Lock-On", "⚔️")
@@ -1298,7 +1297,6 @@ function showMainPanel()
 	msCorner.CornerRadius = UDim.new(0, 4)
 	msCorner.Parent = modeSwitchBtn
 
-	-- Seção de FOV & Filtros de Alvo na aba Aim Lock
 	local secFilters = createSection(aimLockPage, "FOV & Filtros de Alvo", "🎯")
 	addToggle(secFilters, "Ativar Círculo FOV", function(state) _G_FovVisible = state end)
 	addSlider(secFilters, "Raio do FOV", 50, 500, 150, function(val) _G_FovRadius = val end)
@@ -1446,7 +1444,6 @@ local function getAdvancedTarget()
 
 	if not myChar or not myChar:FindFirstChild("HumanoidRootPart") then return nil end
 	
-	-- Verifica se VOCÊ (LocalPlayer) está segurando um item
 	if _G_FilterHoldingItem then
 		local holdingTool = false
 		for _, item in ipairs(myChar:GetChildren()) do
@@ -1476,7 +1473,6 @@ local function getAdvancedTarget()
 						if not _G_FovVisible or screenDist <= _G_FovRadius then
 							local score = dist
 
-							-- Filtro de mais perto geral
 							if _G_FilterClosest then
 								score = dist
 							end
@@ -1550,17 +1546,21 @@ RunService.RenderStepped:Connect(function()
 		end
 	end
 
-	-- Lógica completa de customização do Círculo de FOV
+	-- Lógica segura de customização do Círculo de FOV
 	if _G_FovVisible and fovCircleDrawing then
-		fovCircleDrawing.Visible = true
-		fovCircleDrawing.Radius = _G_FovRadius
-		fovCircleDrawing.Thickness = _G_FovThickness
-		fovCircleDrawing.Transparency = _G_FovTransparency
-		fovCircleDrawing.Color = _G_ColorFov
-		fovCircleDrawing.Position = Vector2.new(camera.ViewportSize.X / 2, camera.ViewportSize.Y / 2)
-		fovCircleDrawing.Filled = false
+		pcall(function()
+			fovCircleDrawing.Visible = true
+			fovCircleDrawing.Radius = _G_FovRadius
+			fovCircleDrawing.Thickness = _G_FovThickness
+			fovCircleDrawing.Transparency = _G_FovTransparency
+			fovCircleDrawing.Color = _G_ColorFov
+			fovCircleDrawing.Position = Vector2.new(camera.ViewportSize.X / 2, camera.ViewportSize.Y / 2)
+			fovCircleDrawing.Filled = false
+		end)
 	elseif fovCircleDrawing then
-		fovCircleDrawing.Visible = false
+		pcall(function()
+			fovCircleDrawing.Visible = false
+		end)
 	end
 
 	if isLockOnEnabled then
@@ -1586,129 +1586,135 @@ RunService.RenderStepped:Connect(function()
 				local pos, onScreen = camera:WorldToViewportPoint(hrp.Position)
 
 				if not espDrawings[targetPlayer] then
-					espDrawings[targetPlayer] = {
-						Box = Drawing.new("Square"),
-						Line = Drawing.new("Line"),
-						NameText = Drawing.new("Text"),
-						DistText = Drawing.new("Text"),
-						HeadDot = Drawing.new("Circle"),
-						HealthBarBg = Drawing.new("Square"),
-						HealthBarFill = Drawing.new("Square")
-					}
+					pcall(function()
+						espDrawings[targetPlayer] = {
+							Box = Drawing.new("Square"),
+							Line = Drawing.new("Line"),
+							NameText = Drawing.new("Text"),
+							DistText = Drawing.new("Text"),
+							HeadDot = Drawing.new("Circle"),
+							HealthBarBg = Drawing.new("Square"),
+							HealthBarFill = Drawing.new("Square")
+						}
+					end)
 				end
 
 				local cache = espDrawings[targetPlayer]
-				local head = tChar:FindFirstChild("Head")
+				if cache then
+					local head = tChar:FindFirstChild("Head")
 
-				if _G_EspBox and onScreen then
-					local headPos = head and camera:WorldToViewportPoint(head.Position + Vector3.new(0, 0.5, 0)) or pos
-					local legPos = camera:WorldToViewportPoint(hrp.Position - Vector3.new(0, 3, 0))
-					local height = math.abs(headPos.Y - legPos.Y)
-					local width = height / 1.8
+					if _G_EspBox and onScreen then
+						local headPos = head and camera:WorldToViewportPoint(head.Position + Vector3.new(0, 0.5, 0)) or pos
+						local legPos = camera:WorldToViewportPoint(hrp.Position - Vector3.new(0, 3, 0))
+						local height = math.abs(headPos.Y - legPos.Y)
+						local width = height / 1.8
 
-					cache.Box.Size = Vector2.new(width, height)
-					cache.Box.Position = Vector2.new(pos.X - width / 2, pos.Y - height / 2)
-					cache.Box.Color = _G_ColorBox
-					cache.Box.Thickness = 1
-					cache.Box.Visible = true
-				else
-					cache.Box.Visible = false
-				end
-
-				if _G_EspLine and onScreen then
-					cache.Line.From = Vector2.new(camera.ViewportSize.X / 2, camera.ViewportSize.Y)
-					cache.Line.To = Vector2.new(pos.X, pos.Y)
-					cache.Line.Color = _G_ColorLine
-					cache.Line.Thickness = 1
-					cache.Line.Visible = true
-				else
-					cache.Line.Visible = false
-				end
-
-				local highlight = tChar:FindFirstChild("AetherisHighlight")
-				if _G_EspChams then
-					if not highlight then
-						highlight = Instance.new("Highlight")
-						highlight.Name = "AetherisHighlight"
-						highlight.Parent = tChar
+						cache.Box.Size = Vector2.new(width, height)
+						cache.Box.Position = Vector2.new(pos.X - width / 2, pos.Y - height / 2)
+						cache.Box.Color = _G_ColorBox
+						cache.Box.Thickness = 1
+						cache.Box.Visible = true
+					else
+						cache.Box.Visible = false
 					end
-					highlight.FillColor = _G_ColorChams
-					highlight.OutlineColor = Color3.fromRGB(255, 255, 255)
-					highlight.Enabled = true
-				elseif highlight then
-					highlight.Enabled = false
-				end
 
-				if _G_EspHealth and onScreen then
-					local hum = tChar.Humanoid
-					local headPos = head and camera:WorldToViewportPoint(head.Position + Vector3.new(0, 0.5, 0)) or pos
-					local legPos = camera:WorldToViewportPoint(hrp.Position - Vector3.new(0, 3, 0))
-					local height = math.abs(headPos.Y - legPos.Y)
-					local width = height / 1.8
+					if _G_EspLine and onScreen then
+						cache.Line.From = Vector2.new(camera.ViewportSize.X / 2, camera.ViewportSize.Y)
+						cache.Line.To = Vector2.new(pos.X, pos.Y)
+						cache.Line.Color = _G_ColorLine
+						cache.Line.Thickness = 1
+						cache.Line.Visible = true
+					else
+						cache.Line.Visible = false
+					end
 
-					local barHeight = height
-					local currentHealthHeight = barHeight * (hum.Health / hum.MaxHealth)
+					local highlight = tChar:FindFirstChild("AetherisHighlight")
+					if _G_EspChams then
+						if not highlight then
+							highlight = Instance.new("Highlight")
+							highlight.Name = "AetherisHighlight"
+							highlight.Parent = tChar
+						end
+						highlight.FillColor = _G_ColorChams
+						highlight.OutlineColor = Color3.fromRGB(255, 255, 255)
+						highlight.Enabled = true
+					elseif highlight then
+						highlight.Enabled = false
+					end
 
-					cache.HealthBarBg.Size = Vector2.new(3, barHeight)
-					cache.HealthBarBg.Position = Vector2.new(pos.X - width / 2 - 6, pos.Y - height / 2)
-					cache.HealthBarBg.Color = Color3.fromRGB(20, 20, 20)
-					cache.HealthBarBg.Filled = true
-					cache.HealthBarBg.Visible = true
+					if _G_EspHealth and onScreen then
+						local hum = tChar.Humanoid
+						local headPos = head and camera:WorldToViewportPoint(head.Position + Vector3.new(0, 0.5, 0)) or pos
+						local legPos = camera:WorldToViewportPoint(hrp.Position - Vector3.new(0, 3, 0))
+						local height = math.abs(headPos.Y - legPos.Y)
+						local width = height / 1.8
 
-					cache.HealthBarFill.Size = Vector2.new(1, currentHealthHeight)
-					cache.HealthBarFill.Position = Vector2.new(pos.X - width / 2 - 5, pos.Y - height / 2 + (barHeight - currentHealthHeight))
-					cache.HealthBarFill.Color = _G_ColorHealth
-					cache.HealthBarFill.Filled = true
-					cache.HealthBarFill.Visible = true
-				else
-					cache.HealthBarBg.Visible = false
-					cache.HealthBarFill.Visible = false
-				end
+						local barHeight = height
+						local currentHealthHeight = barHeight * (hum.Health / hum.MaxHealth)
 
-				if _G_EspName and onScreen and hrp then
-					cache.NameText.Text = targetPlayer.Name
-					cache.NameText.Size = 12
-					cache.NameText.Center = true
-					cache.NameText.Outline = true
-					cache.NameText.Color = _G_ColorName
-					cache.NameText.Position = Vector2.new(pos.X, pos.Y - 35)
-					cache.NameText.Visible = true
-				else
-					cache.NameText.Visible = false
-				end
+						cache.HealthBarBg.Size = Vector2.new(3, barHeight)
+						cache.HealthBarBg.Position = Vector2.new(pos.X - width / 2 - 6, pos.Y - height / 2)
+						cache.HealthBarBg.Color = Color3.fromRGB(20, 20, 20)
+						cache.HealthBarBg.Filled = true
+						cache.HealthBarBg.Visible = true
 
-				if _G_EspDistance and onScreen then
-					local dist = math.floor((camera.CFrame.Position - hrp.Position).Magnitude)
-					cache.DistText.Text = "[" .. dist .. "m]"
-					cache.DistText.Size = 11
-					cache.DistText.Center = true
-					cache.DistText.Outline = true
-					cache.DistText.Color = _G_ColorDistance
-					cache.DistText.Position = Vector2.new(pos.X, pos.Y + 25)
-					cache.DistText.Visible = true
-				else
-					cache.DistText.Visible = false
-				end
+						cache.HealthBarFill.Size = Vector2.new(1, currentHealthHeight)
+						cache.HealthBarFill.Position = Vector2.new(pos.X - width / 2 - 5, pos.Y - height / 2 + (barHeight - currentHealthHeight))
+						cache.HealthBarFill.Color = _G_ColorHealth
+						cache.HealthBarFill.Filled = true
+						cache.HealthBarFill.Visible = true
+					else
+						cache.HealthBarBg.Visible = false
+						cache.HealthBarFill.Visible = false
+					end
 
-				if _G_EspHead and head and onScreen then
-					local headPos = camera:WorldToViewportPoint(head.Position)
-					cache.HeadDot.Radius = 4
-					cache.HeadDot.Position = Vector2.new(headPos.X, headPos.Y)
-					cache.HeadDot.Color = _G_ColorHead
-					cache.HeadDot.Filled = true
-					cache.HeadDot.Visible = true
-				else
-					cache.HeadDot.Visible = false
+					if _G_EspName and onScreen and hrp then
+						cache.NameText.Text = targetPlayer.Name
+						cache.NameText.Size = 12
+						cache.NameText.Center = true
+						cache.NameText.Outline = true
+						cache.NameText.Color = _G_ColorName
+						cache.NameText.Position = Vector2.new(pos.X, pos.Y - 35)
+						cache.NameText.Visible = true
+					else
+						cache.NameText.Visible = false
+					end
+
+					if _G_EspDistance and onScreen then
+						local dist = math.floor((camera.CFrame.Position - hrp.Position).Magnitude)
+						cache.DistText.Text = "[" .. dist .. "m]"
+						cache.DistText.Size = 11
+						cache.DistText.Center = true
+						cache.DistText.Outline = true
+						cache.DistText.Color = _G_ColorDistance
+						cache.DistText.Position = Vector2.new(pos.X, pos.Y + 25)
+						cache.DistText.Visible = true
+					else
+						cache.DistText.Visible = false
+					end
+
+					if _G_EspHead and head and onScreen then
+						local headPos = camera:WorldToViewportPoint(head.Position)
+						cache.HeadDot.Radius = 4
+						cache.HeadDot.Position = Vector2.new(headPos.X, headPos.Y)
+						cache.HeadDot.Color = _G_ColorHead
+						cache.HeadDot.Filled = true
+						cache.HeadDot.Visible = true
+					else
+						cache.HeadDot.Visible = false
+					end
 				end
 			else
 				if espDrawings[targetPlayer] then
-					espDrawings[targetPlayer].Box.Visible = false
-					espDrawings[targetPlayer].Line.Visible = false
-					espDrawings[targetPlayer].NameText.Visible = false
-					espDrawings[targetPlayer].DistText.Visible = false
-					espDrawings[targetPlayer].HeadDot.Visible = false
-					espDrawings[targetPlayer].HealthBarBg.Visible = false
-					espDrawings[targetPlayer].HealthBarFill.Visible = false
+					pcall(function()
+						espDrawings[targetPlayer].Box.Visible = false
+						espDrawings[targetPlayer].Line.Visible = false
+						espDrawings[targetPlayer].NameText.Visible = false
+						espDrawings[targetPlayer].DistText.Visible = false
+						espDrawings[targetPlayer].HeadDot.Visible = false
+						espDrawings[targetPlayer].HealthBarBg.Visible = false
+						espDrawings[targetPlayer].HealthBarFill.Visible = false
+					end)
 				end
 				local hl = tChar and tChar:FindFirstChild("AetherisHighlight")
 				if hl then hl.Enabled = false end
