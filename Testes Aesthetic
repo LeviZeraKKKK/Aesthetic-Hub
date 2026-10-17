@@ -35,7 +35,7 @@ local isMobile = UserInputService.TouchEnabled and not UserInputService.Keyboard
 local currentPanelSize = isMobile and UDim2.new(0, 420, 0, 270) or UDim2.new(0, 580, 0, 390)
 
 -----------------------------------------------------------------
--- ESTADOS GLOBAIS & CORES ESP INDIVIDUAIS
+-- ESTADOS GLOBAIS & CORES ESP / FOV
 -----------------------------------------------------------------
 local _G_WalkSpeedEnabled = false
 local _G_WalkSpeedValue = 16
@@ -56,10 +56,14 @@ local _G_FilterLowestHP = false
 local _G_FilterCrosshair = false
 local _G_FilterHoldingItem = false
 
+-- Estados do FOV Customizável
 local _G_FovVisible = false
 local _G_FovRadius = 150
+local _G_FovThickness = 1
+local _G_FovTransparency = 0.7
+local _G_ColorFov = Color3.fromRGB(138, 43, 226)
 
--- Proteção segura para a biblioteca Drawing (Evita crash se o executor não suportar)
+-- Proteção segura para a biblioteca Drawing
 local fovCircleDrawing = nil
 pcall(function()
 	if Drawing and typeof(Drawing.new) == "function" then
@@ -1248,7 +1252,7 @@ function showMainPanel()
 	end)
 
 	-----------------------------------------------------------------
-	-- ABA COMBATE
+	-- ABA COMBATE (Com Configurações de FOV Personalizável na Seção)
 	-----------------------------------------------------------------
 	local combatePage = pages["Combate"]
 	local secCombat = createSection(combatePage, "Sistema Lock-On", "⚔️")
@@ -1292,9 +1296,14 @@ function showMainPanel()
 	msCorner.CornerRadius = UDim.new(0, 4)
 	msCorner.Parent = modeSwitchBtn
 
+	-- Seção de FOV & Filtros de Alvo unificada na aba Combate
 	local secFilters = createSection(combatePage, "FOV & Filtros de Alvo", "🎯")
 	addToggle(secFilters, "Ativar Círculo FOV", function(state) _G_FovVisible = state end)
 	addSlider(secFilters, "Raio do FOV", 50, 500, 150, function(val) _G_FovRadius = val end)
+	addSlider(secFilters, "Grossura do FOV", 1, 5, 1, function(val) _G_FovThickness = val end)
+	addSlider(secFilters, "Transparência do FOV (%)", 10, 100, 70, function(val) _G_FovTransparency = val / 100 end)
+	addColorPicker(secFilters, "Cor do Círculo FOV", _G_ColorFov, function(c) _G_ColorFov = c end)
+
 	addToggle(secFilters, "Filtro por Distância Máxima", function(state) _G_FilterDistanceEnabled = state end)
 	addSlider(secFilters, "Distância Máxima", 50, 2000, 500, function(val) _G_FilterDistanceMax = val end)
 	addToggle(secFilters, "Priorizar Menor Vida (HP)", function(state) _G_FilterLowestHP = state end)
@@ -1533,15 +1542,15 @@ RunService.RenderStepped:Connect(function()
 		end
 	end
 
-	-- Lógica segura do Círculo de FOV na Tela
+	-- Lógica completa de customização do Círculo de FOV
 	if _G_FovVisible and fovCircleDrawing then
 		fovCircleDrawing.Visible = true
 		fovCircleDrawing.Radius = _G_FovRadius
+		fovCircleDrawing.Thickness = _G_FovThickness
+		fovCircleDrawing.Transparency = _G_FovTransparency
+		fovCircleDrawing.Color = _G_ColorFov
 		fovCircleDrawing.Position = Vector2.new(camera.ViewportSize.X / 2, camera.ViewportSize.Y / 2)
-		fovCircleDrawing.Color = currentThemeColor
-		fovCircleDrawing.Thickness = 1
 		fovCircleDrawing.Filled = false
-		fovCircleDrawing.Transparency = 0.7
 	elseif fovCircleDrawing then
 		fovCircleDrawing.Visible = false
 	end
